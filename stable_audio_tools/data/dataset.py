@@ -1,3 +1,4 @@
+import ast
 import importlib
 import numpy as np
 import io
@@ -617,8 +618,8 @@ class LocalWebDataLoader():
 
         sample["json"]["timestamps"] = (t_start, t_end)
 
-        if "caption" in sample["json"]:
-            sample["json"]['keywords'] = sample['json']['aspect_list']
+        if "caption" in sample["json"] or "aspect_list" in sample["json"]:
+            sample["json"]['keywords'] = ast.literal_eval(sample['json']['aspect_list'])
             sample["json"]["prompt"] = sample["json"]["caption"]
 
         # Check for custom metadata functions

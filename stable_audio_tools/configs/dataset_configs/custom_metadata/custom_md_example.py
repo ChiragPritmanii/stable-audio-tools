@@ -1,5 +1,6 @@
 def get_custom_metadata(info, audio):
-    concat = info['prompt'] + f" keywords: {", ".join(info['keywords'])}"
+    keywords = ", ".join(info['keywords'])
+    concat = info['prompt'] + f" keywords: {keywords}"
     sample_info = {"concat_prompt": concat}
     return sample_info
 
