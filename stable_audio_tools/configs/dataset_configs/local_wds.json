@@ -3,7 +3,7 @@
     "datasets": [
         {
             "id": "local-test",
-            "local_path": "/home/chirag/FMA/data/fma_large.tar",
+            "local_path": "/home/chirag/FMA/data/fma_large.tar"
         }
     ],
     "random_crop": true
