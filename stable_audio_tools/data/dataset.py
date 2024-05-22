@@ -347,8 +347,8 @@ def get_all_s3_urls(
 
 def log_and_continue(exn):
     """Call in an exception handler to ignore any exception, isssue a warning, and continue."""
-    print(f"Handling webdataset error ({traceback.format_exc()}). Ignoring.")
-    # print(f"Handling webdataset error ({repr(exn)}). Ignoring.")
+    # print(f"Handling webdataset error ({traceback.format_exc()}). Ignoring.")
+    print(f"Handling webdataset error ({repr(exn)}). Ignoring.")
     return True
 
 
@@ -405,9 +405,12 @@ class LocalDatasetConfig:
 def audio_decoder(key, value):
     # Get file extension from key
     ext = key.split(".")[-1]
+    print(ext)
+    print(key)
+    print(value)
 
     if ext in AUDIO_KEYS:
-        return torchaudio.load(io.BytesIO(value), format='mp3')
+        return torchaudio.load(io.BytesIO(value))
     else:
         return None
 
@@ -564,7 +567,7 @@ class LocalWebDataLoader():
 
         self.dataset = wds.DataPipeline(
             wds.ResampledShards(urls),
-            wds.tarfile_to_samples(handler=log_and_continue),
+            wds.tarfile_totarfile_to_samples_samples(handler=log_and_continue),
             wds.decode(audio_decoder, handler=log_and_continue),
             wds.map(self.wds_preprocess, handler=log_and_continue),
             wds.select(is_valid_sample),
