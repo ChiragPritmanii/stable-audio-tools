@@ -1,4 +1,5 @@
 import ast
+import traceback
 import importlib
 import numpy as np
 import io
@@ -346,7 +347,7 @@ def get_all_s3_urls(
 
 def log_and_continue(exn):
     """Call in an exception handler to ignore any exception, isssue a warning, and continue."""
-    print(f"Handling webdataset error ({str(exn)}). Ignoring.")
+    print(f"Handling webdataset error ({traceback.format_exc()}). Ignoring.")
     # print(f"Handling webdataset error ({repr(exn)}). Ignoring.")
     return True
 
