@@ -3,8 +3,7 @@
     "datasets": [
         {
             "id": "local-test",
-            "local_path": "/content/drive/MyDrive/Music_Caps_100_tar/dataset.tar",
-            "custom_metadata_module": "stable_audio_tools/configs/dataset_configs/custom_metadata/custom_md_example.py"
+            "local_path": "/home/chirag/FMA/data/fma_large.tar",
         }
     ],
     "random_crop": true
