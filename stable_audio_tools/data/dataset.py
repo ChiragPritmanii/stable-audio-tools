@@ -21,6 +21,8 @@ from typing import Optional, Callable, List
 
 from .utils import Stereo, Mono, PhaseFlipper, PadCrop_Normalized_T
 
+torchaudio.set_audio_backend("sox_io")
+
 AUDIO_KEYS = ("flac", "wav", "mp3", "m4a", "ogg", "opus")
 
 # fast_scandir implementation by Scott Hawley originally in https://github.com/zqevans/audio-diffusion/blob/main/dataset/dataset.py
