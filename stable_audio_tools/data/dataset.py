@@ -567,7 +567,7 @@ class LocalWebDataLoader():
 
         self.dataset = wds.DataPipeline(
             wds.ResampledShards(urls),
-            wds.tarfile_to_samples_samples(handler=log_and_continue),
+            wds.tarfile_to_samples(handler=log_and_continue),
             wds.decode(audio_decoder, handler=log_and_continue),
             wds.map(self.wds_preprocess, handler=log_and_continue),
             wds.select(is_valid_sample),
