@@ -405,9 +405,8 @@ class LocalDatasetConfig:
 def audio_decoder(key, value):
     # Get file extension from key
     ext = key.split(".")[-1]
-    print(ext)
     print(key)
-    print(value)
+    print(len(value))
 
     if ext in AUDIO_KEYS:
         return torchaudio.load(io.BytesIO(value))
