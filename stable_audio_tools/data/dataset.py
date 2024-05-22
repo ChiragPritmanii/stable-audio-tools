@@ -407,7 +407,7 @@ def audio_decoder(key, value):
     ext = key.split(".")[-1]
 
     if ext in AUDIO_KEYS:
-        return torchaudio.load(io.BytesIO(value))
+        return torchaudio.load(io.BytesIO(value), format='mp3')
     else:
         return None
 
