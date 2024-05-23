@@ -35,7 +35,7 @@
         "io_channels": 2
     },
     "training": {
-        "learning_rate": 1.5e-4,
+        "learning_rate": 7.5e-5,
         "warmup_steps": 0,
         "use_ema": true,
         "optimizer_configs": {
@@ -44,7 +44,7 @@
                     "type": "AdamW",
                     "config": {
                         "betas": [0.8, 0.99],
-                        "lr": 1.5e-4,
+                        "lr": 7.5e-5,
                         "weight_decay": 1e-3
                     }
                 },
@@ -62,7 +62,7 @@
                     "type": "AdamW",
                     "config": {
                         "betas": [0.8, 0.99],
-                        "lr": 3e-4,
+                        "lr": 1.5e-4,
                         "weight_decay": 1e-3
                     }
                 },
