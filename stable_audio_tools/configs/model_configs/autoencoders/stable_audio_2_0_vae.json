@@ -37,6 +37,7 @@
     "training": {
         "learning_rate": 7.5e-5,
         "warmup_steps": 0,
+        "encoder_freeze_on_warmup": true,
         "use_ema": true,
         "optimizer_configs": {
             "autoencoder": {
@@ -111,7 +112,7 @@
             "bottleneck": {
                 "type": "kl",
                 "weights": {
-                    "kl": 1e-4
+                    "kl": 0
                 }
             }
         },
