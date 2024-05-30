@@ -616,13 +616,14 @@ class LocalWebDataLoader():
             PhaseFlipper() if self.augment_phase else torch.nn.Identity()
         )
 
-        audio = augs(audio)
+        audio = augs(audio) #get augmented audio
 
         sample["json"]["timestamps"] = (t_start, t_end)
 
-        if "caption" in sample["json"] or "aspect_list" in sample["json"]:
-            sample["json"]['keywords'] = ast.literal_eval(sample['json']['aspect_list'])
-            sample["json"]["prompt"] = sample["json"]["caption"]
+        if all(item in sample["json"] for item in ["album", "artist", "track"]):
+            #sample["json"] has all the raw metadata
+            #use it to create a prompt leveraging custom_metadata_fn
+            pass
 
         # Check for custom metadata functions
         for dataset in self.datasets:
@@ -630,8 +631,8 @@ class LocalWebDataLoader():
                 continue
         
             if dataset.local_path in sample["__url__"]:
-                custom_metadata = dataset.custom_metadata_fn(sample["json"], audio)
-                sample["json"].update(custom_metadata)
+                custom_metadata = dataset.custom_metadata_fn(sample["json"], audio) #(info, audio)
+                sample["json"].update(custom_metadata) #add a new key-value pair to json corr. to audio
 
         if found_key != rewrite_key:   # rename long/weird key with its simpler counterpart
             del sample[found_key]
@@ -639,7 +640,7 @@ class LocalWebDataLoader():
         sample["audio"] = audio
 
         # Add audio to the metadata as well for conditioning
-        sample["json"]["audio"] = audio
+        sample["json"]["audio"] = audio #audio is added to json too 
         
         return sample
 
