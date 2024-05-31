@@ -1,12 +1,13 @@
 {
     "model_type": "diffusion_cond",
-    "sample_size": 12582912,
+    "sample_size": 3145728,
     "sample_rate": 44100,
     "audio_channels": 2,
     "model": {
         "pretransform": {
             "type": "autoencoder",
             "iterate_batch": true,
+            "scale": 0.885,
             "config": {
                 "encoder": {
                     "type": "oobleck",
@@ -43,37 +44,19 @@
             "configs": [
                 {
                     "id": "prompt",
-                    "type": "clap_text",
+                    "type": "t5",
                     "config": {
-                        "audio_model_type": "HTSAT-base",
-                        "enable_fusion": true,
-                        "clap_ckpt_path": "/path/to/clap.ckpt",
-                        "use_text_features": true,
-                        "feature_layer_ix": -2
+                        "t5_model_name": "t5-base",
+                        "max_length": 77
                     }
-                },
-                {
-                    "id": "seconds_start",
-                    "type": "number",
-                    "config": {
-                        "min_val": 0,
-                        "max_val": 512
-                    }
-                },
-                {
-                    "id": "seconds_total",
-                    "type": "number",
-                    "config": {
-                        "min_val": 0,
-                        "max_val": 512
-                    }
+
                 }
             ],
             "cond_dim": 768
         },
         "diffusion": {
-            "cross_attention_cond_ids": ["prompt", "seconds_start", "seconds_total"],
-            "global_cond_ids": ["seconds_start", "seconds_total"],
+            "cross_attention_cond_ids": ["prompt"],
+            "global_cond_ids": [],
             "type": "dit",
             "config": {
                 "io_channels": 64,
@@ -81,7 +64,6 @@
                 "depth": 24,
                 "num_heads": 24,
                 "cond_token_dim": 768,
-                "global_cond_dim": 1536,
                 "project_cond_tokens": false,
                 "transformer_type": "continuous_transformer"
             }
@@ -116,10 +98,10 @@
             "demo_steps": 250,
             "num_demos": 4,
             "demo_cond": [
-                {"prompt": "A beautiful piano arpeggio", "seconds_start": 0, "seconds_total": 80},
-                {"prompt": "A tropical house track with upbeat melodies, a driving bassline, and cheery vibes", "seconds_start": 0, "seconds_total": 250},
-                {"prompt": "A cool 80s glam rock song with driving drums and distorted guitars", "seconds_start": 0, "seconds_total": 180},
-                {"prompt": "A grand orchestral arrangement with thunderous percussion, epic brass fanfares, and soaring strings, creating a cinematic atmosphere fit for a heroic battle.", "seconds_start": 0, "seconds_total": 190}
+                {"prompt": "A beautiful piano arpeggio, Avant-Garde, International, Blues"},
+                {"prompt": "A tropical house track with upbeat melodies, a driving bassline, and cheery vibes, Jazz, Blues"},
+                {"prompt": "A cool 80s glam rock song with driving drums and distorted guitars, drums, bass"},
+                {"prompt": "A grand orchestral arrangement with thunderous percussion, epic brass fanfares, and soaring strings, creating a cinematic atmosphere fit for a heroic battle."}
             ],
             "demo_cfg_scales": [3, 6, 9]
         }
