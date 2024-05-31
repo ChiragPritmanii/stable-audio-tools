@@ -479,6 +479,7 @@ class MultiConditioner(nn.Module):
 
         self.conditioners = nn.ModuleDict(conditioners)
         self.default_keys = default_keys
+        print(conditioners, default_keys)
 
     def forward(self, batch_metadata: tp.List[tp.Dict[str, tp.Any]], device: tp.Union[torch.device, str]) -> tp.Dict[str, tp.Any]:
         output = {}
@@ -487,7 +488,7 @@ class MultiConditioner(nn.Module):
             condition_key = key
 
             conditioner_inputs = []
-
+            print(batch_metadata)
             for x in batch_metadata:
 
                 if condition_key not in x:
@@ -520,13 +521,13 @@ def create_multi_conditioner_from_conditioning_config(config: tp.Dict[str, tp.An
     default_keys = config.get("default_keys", {})
 
     for conditioner_info in config["configs"]:
-        id = conditioner_info["id"]
+        id = conditioner_info["id"] #"prompt"
 
         conditioner_type = conditioner_info["type"]
 
         conditioner_config = {"output_dim": cond_dim}
         
-        conditioner_config.update(conditioner_info["config"])
+        conditioner_config.update(conditioner_info["config"]) # "t5_model_name": "t5-base", "max_length": 77 "output_dim": cond_dim
 
         if conditioner_type == "t5":
             conditioners[id] = T5Conditioner(**conditioner_config)
