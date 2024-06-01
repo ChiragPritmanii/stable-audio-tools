@@ -1,7 +1,7 @@
 def get_custom_metadata(info, audio):
     tags = [info["artist"]["tags"], info["track"]["tags"], info["track"]["genres"]]
     #avoiding album text, because its too large and often less descriptive
-    text = [info["album"]["title"], info["track"]["title"], info["track"]["info"], info["tack"]["year"]]
+    text = [info["album"]["title"], info["track"]["title"], info["track"]["info"], info["track"]["year"]]
     filtered_text = []
     for i in text:
         if i!="":
