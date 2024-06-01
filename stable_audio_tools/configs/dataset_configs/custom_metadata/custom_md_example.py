@@ -9,7 +9,7 @@ def get_custom_metadata(info, audio):
     
     filtered_tags = []
     for i in tags:
-        if i!=[]:
+        if len(i)>0:
             filtered_tags+=i
     
     complete_info = filtered_tags+filtered_text
