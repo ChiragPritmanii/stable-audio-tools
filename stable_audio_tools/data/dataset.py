@@ -632,6 +632,8 @@ class LocalWebDataLoader():
         
             if dataset.local_path in sample["__url__"]:
                 custom_metadata = dataset.custom_metadata_fn(sample["json"], audio) #(info, audio)
+                print(sample["json"])
+                print(custom_metadata)
                 sample["json"].update(custom_metadata) #add a new key-value pair to json corr. to audio
 
         if found_key != rewrite_key:   # rename long/weird key with its simpler counterpart
