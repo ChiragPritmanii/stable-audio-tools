@@ -1,6 +1,6 @@
 {
     "model_type": "diffusion_cond",
-    "sample_size": 3145728,
+    "sample_size": 786432,
     "sample_rate": 44100,
     "audio_channels": 2,
     "model": {
