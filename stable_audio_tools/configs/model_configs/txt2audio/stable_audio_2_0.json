@@ -111,14 +111,14 @@
             }
         },
         "demo": {
-            "demo_every": 2000,
+            "demo_every": 10000,
             "demo_steps": 250,
             "num_demos": 4,
             "demo_cond": [
-                {"prompt":"Tokyo, Japan, J-Pop, Pop Rock, Electronic, 1990s, Catchy Melodies, Electronic Influences","seconds_start": 0, "seconds_total": 80},
-                {"prompt": "Detroit, Techno, Electronic, Futuristic Funk, 1980s, Dancefloor Anthems, Technological Influences","seconds_start": 0, "seconds_total": 190},
-                {"prompt": "tropical house, upbeat melodies, a driving bassline, and cheery vibes, Jazz, Blues",  "seconds_start": 0, "seconds_total": 250},
-                {"prompt": "cool 80s glam rock, driving drums, distorted guitars, bass",  "seconds_start": 0, "seconds_total": 180}
+                {"prompt":"tokyo, japan, j-pop, pop rock, electronic, 2008, catchy melodies, electronic influences","seconds_start": 0, "seconds_total": 80},
+                {"prompt": "detroit, techno, electronic, futuristic funk, 1980s, dancefloor anthems, technological influences","seconds_start": 0, "seconds_total": 190},
+                {"prompt": "tropical house, upbeat melodies, a driving bassline, and cheery vibes, Jazz, Blues, 2010",  "seconds_start": 0, "seconds_total": 250},
+                {"prompt": "cool, 1990, glam rock, driving drums, distorted guitars, bass",  "seconds_start": 0, "seconds_total": 180}
             ],
             "demo_cfg_scales": [3, 6, 9]
         }
