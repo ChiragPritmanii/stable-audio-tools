@@ -1,13 +1,13 @@
 {
     "model_type": "diffusion_cond",
-    "sample_size": 65536,
+    "sample_size": 3145728,
     "sample_rate": 44100,
     "audio_channels": 2,
     "model": {
         "pretransform": {
             "type": "autoencoder",
             "iterate_batch": true,
-            "scale": 0.885,
+            "scale": 0.875,
             "config": {
                 "encoder": {
                     "type": "oobleck",
@@ -50,6 +50,22 @@
                         "max_length": 77
                     }
 
+                },
+                {
+                    "id": "seconds_start",
+                    "type": "int",
+                    "config": {
+                        "min_val": 0,
+                        "max_val": 512
+                    }
+                },
+                {
+                    "id": "seconds_total",
+                    "type": "int",
+                    "config": {
+                        "min_val": 0,
+                        "max_val": 512
+                    }
                 }
             ],
             "cond_dim": 768
