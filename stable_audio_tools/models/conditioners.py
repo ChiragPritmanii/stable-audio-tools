@@ -479,7 +479,6 @@ class MultiConditioner(nn.Module):
 
         self.conditioners = nn.ModuleDict(conditioners)
         self.default_keys = default_keys
-        print(conditioners, default_keys)
 
     def forward(self, batch_metadata: tp.List[tp.Dict[str, tp.Any]], device: tp.Union[torch.device, str]) -> tp.Dict[str, tp.Any]:
         output = {}
@@ -488,7 +487,6 @@ class MultiConditioner(nn.Module):
             condition_key = key
 
             conditioner_inputs = []
-            print(batch_metadata)
             for x in batch_metadata:
 
                 if condition_key not in x:
