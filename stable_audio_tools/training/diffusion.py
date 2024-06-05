@@ -543,8 +543,8 @@ class DiffusionCondDemoCallback(pl.Callback):
             cond_inputs = module.diffusion.get_conditioning_inputs(conditioning)
 
             log_dict = {}
-            demo_data = [[demo_cond[0]['prompt'][0], demo_cond[0]['seconds_start'][0], demo_cond[0]['seconds_total'][0]],
-                         [demo_cond[1]['prompt'][0], demo_cond[1]['seconds_start'][0], demo_cond[1]['seconds_total']][0]] 
+            demo_data = [[demo_cond[0]['prompt'][0], demo_cond[0]['seconds_start'].item(), demo_cond[0]['seconds_total'].item()],
+                         [demo_cond[1]['prompt'][0], demo_cond[1]['seconds_start'].item(), demo_cond[1]['seconds_total'].item()]]
             log_dict["inputs"] = wandb.Table(columns=['prompt', 'seconds_start', 'seconds_total'], data = demo_data)
             print(demo_cond, len(demo_cond))
 
