@@ -543,10 +543,9 @@ class DiffusionCondDemoCallback(pl.Callback):
             cond_inputs = module.diffusion.get_conditioning_inputs(conditioning)
 
             log_dict = {}
-            demo_data = [[demo_cond[0]['prompt'][0], demo_cond[0]['seconds_start'].item(), demo_cond[0]['seconds_total'].item()],
-                         [demo_cond[1]['prompt'][0], demo_cond[1]['seconds_start'].item(), demo_cond[1]['seconds_total'].item()]]
-            log_dict["inputs"] = wandb.Table(columns=['prompt', 'seconds_start', 'seconds_total'], data = demo_data)
-            print(demo_cond, len(demo_cond))
+            demo_data = [[demo_cond[0]['prompt'][0], str(demo_cond[0]['seconds_start'].item()), str(demo_cond[0]['seconds_total'].item())],
+                         [demo_cond[1]['prompt'][0], str(demo_cond[1]['seconds_start'].item()), str(demo_cond[1]['seconds_total'].item())]]
+            log_dict['demo_inputs'] = wandb.Table(columns=['prompt', 'seconds_start', 'seconds_total'], data = demo_data)
 
             if self.display_audio_cond:
                 audio_inputs = torch.cat([cond["audio"] for cond in demo_cond], dim=0)
@@ -573,7 +572,7 @@ class DiffusionCondDemoCallback(pl.Callback):
                 # Put the demos together
                 fakes = rearrange(fakes, 'b d n -> d (b n)')
 
-                log_dict = {}
+                # log_dict = {}
                 
                 filename = f'demo_cfg_{cfg_scale}_{trainer.global_step:08}.wav'
                 fakes = fakes.to(torch.float32).div(torch.max(torch.abs(fakes))).mul(32767).to(torch.int16).cpu()
