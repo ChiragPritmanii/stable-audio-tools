@@ -543,7 +543,8 @@ class DiffusionCondDemoCallback(pl.Callback):
             cond_inputs = module.diffusion.get_conditioning_inputs(conditioning)
 
             log_dict = {}
-            log_dict["inputs"] = wandb.Table(columns=['example_1', 'example_2'], data = demo_cond)
+            # log_dict["inputs"] = wandb.Table(columns=['example_1', 'example_2'], data = demo_cond)
+            print(demo_cond, len(demo_cond))
 
             if self.display_audio_cond:
                 audio_inputs = torch.cat([cond["audio"] for cond in demo_cond], dim=0)
