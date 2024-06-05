@@ -114,9 +114,10 @@
             "demo_every": 10000,
             "demo_steps": 250,
             "num_demos": 2,
+            "demo_cond_from_batch": true,
             "demo_cond": [
                 {"prompt": "detroit, techno, electronic, futuristic funk, 1980s, dancefloor anthems, technological influences","seconds_start": 0, "seconds_total": 180},
-                {"prompt": "tropical house, upbeat melodies, a driving bassline, and cheery vibes, Jazz, Blues, 2010",  "seconds_start": 0, "seconds_total": 120}
+                {"prompt": "tropical house, upbeat melodies, a driving bassline, and cheery vibes, 2010",  "seconds_start": 0, "seconds_total": 120}
             ],
             "demo_cfg_scales": [3, 6, 9]
         }

@@ -531,7 +531,7 @@ class DiffusionCondDemoCallback(pl.Callback):
             demo_cond = batch[1][:self.num_demos]
 
         if module.diffusion.pretransform is not None:
-            demo_samples = demo_samples // module.diffusion.pretransform.downsampling_ratio
+            demo_samples = demo_samples // module.diffusion.pretransform.downsampling_ratio #downsampled sample size 
 
         noise = torch.randn([self.num_demos, module.diffusion.io_channels, demo_samples]).to(module.device)
 
@@ -543,6 +543,7 @@ class DiffusionCondDemoCallback(pl.Callback):
             cond_inputs = module.diffusion.get_conditioning_inputs(conditioning)
 
             log_dict = {}
+            log_dict["inputs"] = wandb.Table(columns=['example_1', 'example_2'], data = demo_cond)
 
             if self.display_audio_cond:
                 audio_inputs = torch.cat([cond["audio"] for cond in demo_cond], dim=0)

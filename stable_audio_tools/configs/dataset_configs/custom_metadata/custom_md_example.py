@@ -1,3 +1,5 @@
+import random 
+
 def get_custom_metadata(info, audio):
     tags = [info["artist"]["tags"], info["track"]["tags"], info["track"]["genres"]]
     #avoiding album text, because its too large and often less descriptive
@@ -13,7 +15,8 @@ def get_custom_metadata(info, audio):
             filtered_tags+=i
     
     complete_info = filtered_tags+filtered_text
-    prompt = ", ".join(complete_info)            
+    random.shuffle(complete_info) #shuffle the list inplace 
+    prompt = ", ".join(complete_info)          
     return {"prompt": prompt}
 
     # # Use relative path as the prompt
