@@ -1,0 +1,6 @@
+add resample
+add random segment selection
+figure out if you want to train on 10/20/30 second segments or mix of all
+if it's a mix of all then figure out a way to add randomness in chunking
+figure out the Distributed Data Training for this
+implement normalization to mel spec

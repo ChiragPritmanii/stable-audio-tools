@@ -588,6 +588,7 @@ class LocalWebDataLoader():
         if '' == found_key:  # got no audio!
             return None  # try returning None to tell WebDataset to skip this one
 
+        # set the config to resample to 48kHz if training from scratch, else use default 44.1kHz
         audio, in_sr = sample[found_key]
         if in_sr != self.sample_rate:
             resample_tf = T.Resample(in_sr, self.sample_rate)
@@ -632,7 +633,7 @@ class LocalWebDataLoader():
         
             if dataset.local_path in sample["__url__"]:
                 custom_metadata = dataset.custom_metadata_fn(sample["json"], audio) #(info, audio)
-                sample["json"].update(custom_metadata) #add a new key-value pair to json corr. to audio
+                sample["json"].update(custom_metadata) #add a new key-value pair for sem_tokens to json corr. to the audio
 
         if found_key != rewrite_key:   # rename long/weird key with its simpler counterpart
             del sample[found_key]

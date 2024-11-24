@@ -425,9 +425,49 @@ class TokenizerLUTConditioner(Conditioner):
             return_tensors="pt",
         )
 
-        input_ids = encoded["input_ids"].to(device)
+        input_ids = encoded["input_ids"].to(device) # b, t
         attention_mask = encoded["attention_mask"].to(device).to(torch.bool)
     
+        embeddings = self.token_embedder(input_ids)
+            
+        embeddings = self.proj_out(embeddings)
+
+        embeddings = embeddings * attention_mask.unsqueeze(-1).float()
+
+        return embeddings, attention_mask
+
+class BestRQLUTConditioner(Conditioner):
+    """
+    A conditioner that embeds text using a lookup table on a pretrained tokenizer's vocabulary
+
+    Args:
+        tokenizer_name: the name of the tokenizer from the Hugging Face transformers library
+        output_dim: the dimension of the output embeddings
+        max_length: the maximum length of the text to embed
+        project_out: whether to add another linear projection to the output embeddings
+    """
+
+    def __init__(
+            self,
+            output_dim: int = 768, # this is the embed size of T5-base (we can directly learn 1536 dim embed or project to that)
+            max_length: int = 2360, # 47*(24000/480) = 2350 ; we add 10 more tokens as buffer 
+            project_out: bool = False,
+    ):
+        super().__init__(output_dim, output_dim, project_out=project_out)
+        
+        # Suppress logging from transformers
+        self.max_length = max_length
+        self.codebook_indices = 16384
+
+        self.token_embedder = nn.Embedding(self.codebook_indices, output_dim)
+
+    def forward(self, codes: tp.List[tp.List[int]], device: tp.Union[torch.device, str]) -> tp.Tuple[torch.Tensor, torch.Tensor]:
+        self.proj_out.to(device)
+
+        input_ids = torch.tensor(codes).to(device) # b, t
+        # attend to all tokens
+        attention_mask = torch.ones((input_ids.shape[0], input_ids.shape[1])).to(device).to(torch.bool) # b, t (bool)
+
         embeddings = self.token_embedder(input_ids)
             
         embeddings = self.proj_out(embeddings)
@@ -541,6 +581,8 @@ def create_multi_conditioner_from_conditioning_config(config: tp.Dict[str, tp.An
             conditioners[id] = PhonemeConditioner(**conditioner_config)
         elif conditioner_type == "lut":
             conditioners[id] = TokenizerLUTConditioner(**conditioner_config)
+        elif conditioner_type == "blut":
+            conditioners[id] = BestRQLUTConditioner(**conditioner_config)
         elif conditioner_type == "pretransform":
             sample_rate = conditioner_config.pop("sample_rate", None)
             assert sample_rate is not None, "Sample rate must be specified for pretransform conditioners"
