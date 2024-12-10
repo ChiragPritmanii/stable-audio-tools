@@ -4,13 +4,13 @@ import numpy as np
 from stable_audio_tools.configs.dataset_configs.custom_metadata.tokenizer.abs_tokenizer import (
     AbsTokenizer,
 )
-from stable_audio_tools.configs.dataset_configs.custom_metadata.tokenizer.bestrq.best_rq_pytorch.vq import (
+from stable_audio_tools.configs.dataset_configs.custom_metadata.tokenizer.best_rq_vq.best_rq_pytorch.vq import (
     VQ,
 )
-from stable_audio_tools.configs.dataset_configs.custom_metadata.tokenizer.bestrq.best_rq_pytorch.best_rq import (
+from stable_audio_tools.configs.dataset_configs.custom_metadata.tokenizer.best_rq_vq.best_rq_pytorch.best_rq import (
     BestRQ,
 )
-from stable_audio_tools.configs.dataset_configs.custom_metadata.tokenizer.bestrq.best_rq_pytorch.conformer import (
+from stable_audio_tools.configs.dataset_configs.custom_metadata.tokenizer.best_rq_vq.best_rq_pytorch.conformer import (
     ConformerWrapper,
 )
 
