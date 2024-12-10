@@ -13,6 +13,7 @@ from .pretransforms import Pretransform
 from ..training.utils import copy_state_dict
 from .utils import load_ckpt_state_dict
 
+import math
 import numpy as np
 from torch import nn
 import torch.nn.functional as F
@@ -514,8 +515,9 @@ class TokenizerLUTConditioner(Conditioner):
 
         return embeddings, attention_mask
 
+
 class PositionalEncoding:
-    def __init__(self, seq_length=1600, embedding_dim=192):
+    def __init__(self, seq_length=1600, embedding_dim=256):
         self.seq_length = seq_length
         self.embedding_dim = embedding_dim
 
@@ -578,7 +580,32 @@ class BestRQConditioner(Conditioner):
 
         input_ids = torch.tensor(codes)  # b, t
         # embeddings = F.embedding(input_ids, self.vq)
-        embeddings = self.vq[codes, :]  # b, t, e
+        embeddings = self.vq[
+            codes, :
+        ]  # b, t, e (need to pad embeddings : (47-32)*50 = 750)
+
+        embeddings_seqlen = embeddings.shape[1]
+
+        # multiply -1 to all embedding in the pad positions
+        embeddings = torch.cat(
+            [
+                embeddings,
+                torch.ones(
+                    embeddings.shape[0],
+                    self.max_length - embeddings.shape[1],
+                    embeddings.shape[2],
+                )
+                * -1,
+            ],
+            dim=1,
+        )  # b, 2350, e
+
+        if self.use_positional_embedding:
+            pe = self.pos_embed(embeddings).to(embeddings.device)
+            embeddings = torch.cat(
+                [embeddings, pe.repeat(embeddings.shape[0], 1, 1)],
+                dim=-1,
+            )  # b, t, e1+e2
 
         # attend to all tokens
         attention_mask = (
@@ -587,6 +614,8 @@ class BestRQConditioner(Conditioner):
             .to(torch.bool)
         )  # b, t (bool)
 
+        attention_mask[:, embeddings_seqlen:] = False
+
         embeddings = self.proj_out(embeddings)
 
         if self.use_positional_embedding:
@@ -594,7 +623,7 @@ class BestRQConditioner(Conditioner):
             representation_quant = torch.cat(
                 [representation_quant, pe.repeat(representation_quant.size(0), 1, 1)],
                 dim=-1,
-            )
+            )  # b, t, e1+e2
 
         embeddings = embeddings * attention_mask.unsqueeze(-1).float()
 

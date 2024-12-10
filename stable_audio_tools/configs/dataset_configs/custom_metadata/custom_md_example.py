@@ -31,6 +31,7 @@ def get_custom_metadata(info, audio):
         audio, orig_freq=44100, new_freq=audio_tokenizer.sr
     )  # audio -> 1, t
 
+    # we only get the codes of unpadded part
     waves = torch.cat([audio[:, ran[0] : ran[1]] for ran in token_range], dim=0)  # b, t
     # the output may be stored in a json and tensor isn't json serializable
     # so consider storing as a list
