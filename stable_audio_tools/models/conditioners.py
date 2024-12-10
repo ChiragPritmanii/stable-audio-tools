@@ -559,14 +559,14 @@ class BestRQConditioner(Conditioner):
     def __init__(
         self,
         vq_ckpt: str,
-        output_dim: int,
+        output_dim: int = 1280,
         max_length: int = 2378, # actual duration is 47.55
         project_out: bool = False,
         use_positional_embedding: bool = True,
         device: str = "cuda",
     ):
         super().__init__(output_dim, output_dim, project_out=project_out)
-
+        
         self.max_length = max_length
         self.codebook_indices = 16384
 
@@ -767,7 +767,9 @@ def create_multi_conditioner_from_conditioning_config(
         elif conditioner_type == "lut":
             conditioners[id] = TokenizerLUTConditioner(**conditioner_config)
         elif conditioner_type == "brq":
-            conditioners[id] = BestRQConditioner(**conditioner_config)
+            conditioners[id] = BestRQConditioner(vq_ckpt="/home/chirag/models/tokenizer/centroids.npy", 
+                                                 max_length=2378, 
+                                                 output_dim=1280)
         elif conditioner_type == "pretransform":
             sample_rate = conditioner_config.pop("sample_rate", None)
             assert (

@@ -71,7 +71,8 @@
                     "type": "brq",
                     "config": {
                         "output_dim": 1280,
-                        "max_length": 2378
+                        "max_length": 2378,
+                        "use_positional_embedding": true
 
                     }
                 },
