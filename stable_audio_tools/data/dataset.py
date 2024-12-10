@@ -697,7 +697,7 @@ class LocalWebDataLoader:
         ):  # rename long/weird key with its simpler counterpart
             del sample[found_key]
 
-        sample["audio"] = audio
+        sample["audio"] = audio_trim
 
         # Add audio to the metadata as well for conditioning
         sample["json"]["audio"] = audio_trim  # audio is added to json too

@@ -6,8 +6,9 @@ from torchaudio.functional import resample
 
 from tokenizer.bestrq.AudioTokenizer import AudioTokenizer
 
-best_rq_ckpt = "..."
-vq_ckpt = "..."
+# checkpoints on current vm
+best_rq_ckpt = "/home/chirag/models/tokenizer/bestrq.196000.pt"
+vq_ckpt = "/home/chirag/models/tokenizer/centroids.npy"
 
 audio_tokenizer = AudioTokenizer(best_rq_ckpt=best_rq_ckpt, vq_ckpt=vq_ckpt)
 

@@ -18,7 +18,8 @@ import numpy as np
 from torch import nn
 import torch.nn.functional as F
 
-
+# // The cond_dim property is used to enforce the same dimension on all conditioning inputs, 
+# // however that can be overridden with an explicit output_dim property on any of the individual configs.
 class Conditioner(nn.Module):
     def __init__(
         self,
@@ -517,7 +518,7 @@ class TokenizerLUTConditioner(Conditioner):
 
 
 class PositionalEncoding:
-    def __init__(self, seq_length=1600, embedding_dim=256):
+    def __init__(self, seq_length=2350, embedding_dim=256):
         self.seq_length = seq_length
         self.embedding_dim = embedding_dim
 
@@ -559,7 +560,7 @@ class BestRQConditioner(Conditioner):
         self,
         vq_ckpt: str,
         output_dim: int,
-        max_length: int = 2350,
+        max_length: int = 2378, # actual duration is 47.55
         project_out: bool = False,
         use_positional_embedding: bool = True,
         device: str = "cuda",
@@ -571,7 +572,8 @@ class BestRQConditioner(Conditioner):
 
         self.vq = torch.tensor(np.load(vq_ckpt)).to(device)
         self.use_positional_embedding = use_positional_embedding
-        self.pos_embed = PositionalEncoding(seq_length=512, embedding_dim=192)
+        # the positions after 1600 are going to be ignored by the attenstion mask anyways
+        self.pos_embed = PositionalEncoding(seq_length=2350, embedding_dim=256)
 
     def forward(
         self, codes: tp.List[tp.List[int]], device: tp.Union[torch.device, str]
@@ -581,7 +583,7 @@ class BestRQConditioner(Conditioner):
         input_ids = torch.tensor(codes)  # b, t
         # embeddings = F.embedding(input_ids, self.vq)
         embeddings = self.vq[
-            codes, :
+            input_ids, :
         ]  # b, t, e (need to pad embeddings : (47-32)*50 = 750)
 
         embeddings_seqlen = embeddings.shape[1]
@@ -592,7 +594,7 @@ class BestRQConditioner(Conditioner):
                 embeddings,
                 torch.ones(
                     embeddings.shape[0],
-                    self.max_length - embeddings.shape[1],
+                    self.max_length - embeddings.shape[1], # 2350 - 1600 = 750
                     embeddings.shape[2],
                 )
                 * -1,
@@ -624,7 +626,7 @@ class BestRQConditioner(Conditioner):
                 [representation_quant, pe.repeat(representation_quant.size(0), 1, 1)],
                 dim=-1,
             )  # b, t, e1+e2
-
+        # unsqueeze attention_mask to for b, t, 1 for broadcasting
         embeddings = embeddings * attention_mask.unsqueeze(-1).float()
 
         return embeddings, attention_mask
