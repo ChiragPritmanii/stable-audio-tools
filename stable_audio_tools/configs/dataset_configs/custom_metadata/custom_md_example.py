@@ -4,7 +4,7 @@ import torch
 from einops import rearrange
 from torchaudio.functional import resample
 
-from tokenizer.bestrq.AudioTokenizer import AudioTokenizer
+from .tokenizer.bestrq.AudioTokenizer import AudioTokenizer
 
 # checkpoints on current vm
 best_rq_ckpt = "/home/chirag/models/tokenizer/bestrq.196000.pt"
