@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 from stable_audio_tools.configs.dataset_configs.custom_metadata.tokenizer.abs_tokenizer import (
     AbsTokenizer,
@@ -37,15 +38,41 @@ best_rq_params = dict(
 )
 
 
-vq_params = dict(
-    heads=1,
-    dim=1024,
-    codebook_dim=32,
-    codebook_size=16384,
-    decay=0.8,
-    commitment_weight=2.0,
-    codebook_diversity_loss_weight=0.2,
-)
+def quant_mem_efficient(
+    representation, centroids, last_token_removed=False, feature_dim=1024
+):
+    assert representation.size(-1) % feature_dim == 0
+    # Removing the first token and keeping the shape as [batch_size, seq_length - 1, 768] for clarity
+
+    if last_token_removed:
+        representation = representation[
+            :, :-1, :
+        ]  # Shape: [batch_size, seq_length - 1, 768]
+
+    # Compute squared norms of each row in representation
+    norm_rep = representation.pow(2).sum(
+        dim=2, keepdim=True
+    )  # Shape: [batch_size, seq_length - 1, 1]
+
+    # Compute squared norms of centroids
+    norm_cent = centroids.pow(2).sum(dim=1, keepdim=True)  # Shape: [2048, 1]
+
+    # Compute dot products
+    # Reshape representation for batch matrix multiplication: [batch_size * (seq_length - 1), 768]
+    rep_flat = representation.reshape(-1, feature_dim)
+    # Dot product, need to transpose centroids: [batch_size * (seq_length - 1), 2048]
+    dot_product = torch.mm(rep_flat, centroids.t())
+    dot_product = dot_product.reshape(
+        representation.shape[0], representation.shape[1], -1
+    )  # Reshape back
+
+    # Compute L2 distance using the formula: ||a-b||^2 = ||a||^2 + ||b||^2 - 2*a.b
+    distances = norm_rep + norm_cent.t() - 2 * dot_product  # Correct broadcasting
+
+    # Find the index of the closest centroid for each vector
+    _, tokens = torch.min(distances, dim=2)  # Shape: [batch_size, seq_length - 1]
+
+    return tokens
 
 
 class AudioTokenizer(AbsTokenizer):
@@ -54,7 +81,6 @@ class AudioTokenizer(AbsTokenizer):
         best_rq_ckpt,
         vq_ckpt,
         best_rq_params=best_rq_params,
-        vq_params=vq_params,
         device="cuda",
     ):
         super().__init__()
@@ -81,21 +107,7 @@ class AudioTokenizer(AbsTokenizer):
         self.best_rq.eval()
         print("BEST-RQ is set to eval mode!")
 
-        self.vq = VQ(
-            heads=vq_params["heads"],
-            dim=vq_params["dim"],
-            codebook_dim=vq_params["codebook_dim"],
-            codebook_size=vq_params["codebook_size"],
-            decay=vq_params["decay"],
-            commitment_weight=vq_params["commitment_weight"],
-            codebook_diversity_loss_weight=vq_params["codebook_diversity_loss_weight"],
-        )
-
-        vq_pkg = self.vq.load(vq_ckpt)
-        print("VQ is loaded on GPU!")
-        self.vq.eval()
-        print("VQ is set to eval mode!")
-
+        self.vq = torch.tensor(np.load(vq_ckpt)).to(device)
 
     @torch.no_grad()
     def encode(self, waves):
@@ -104,5 +116,8 @@ class AudioTokenizer(AbsTokenizer):
             (waves).to(self.device), return_layer_output=self.output_layer
         )
         brq_embed = brq_embed.detach().cpu()  # b, n, d
-        quantized, codes, loss = self.vq(x=brq_embed, return_loss_breakdown=False)
+
+        codes = quant_mem_efficient(brq_embed, self.vq, True, 1024)  # b, n
+        codes = codes.cpu()
+
         return codes  # b, n

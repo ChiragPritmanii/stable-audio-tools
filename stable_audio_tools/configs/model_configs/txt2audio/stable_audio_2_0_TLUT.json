@@ -67,10 +67,10 @@
         "conditioning": {
             "configs": [
                 {
-                    "id": "sem_tokens",
-                    "type": "blut",
+                    "id": "tokens",
+                    "type": "brq",
                     "config": {
-                        "output_dim": 768,
+                        "output_dim": 1024,
                         "max_length": 2351
                     }
                 },

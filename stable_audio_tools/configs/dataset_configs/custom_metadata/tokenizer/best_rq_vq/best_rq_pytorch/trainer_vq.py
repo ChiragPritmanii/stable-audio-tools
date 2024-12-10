@@ -321,6 +321,30 @@ class VQPretrainer(nn.Module):
                 },
             )
 
+        # check nan in gradients
+        nan_grads = False
+        for p in self.model.parameters():
+            if p.grad is not None and torch.isnan(p.grad).any():
+                nan_grads = True
+                break
+
+        # if gradients are nan then skip the update
+        if nan_grads:
+            self.print("NaN detected in gradients!")
+
+            for p in self.model.parameters():
+                # wherever the gradients are nan zero them out, keep the rest same
+                if p.grad is not None:
+                    nan_count = torch.isnan(p.grad).sum().item()
+                    count = torch.ones_like(p.grad).sum().item()
+                    print(f"{nan_count} values are NaN out of {count}")
+                    p.grad = torch.where(
+                        torch.isnan(p.grad) | torch.isinf(p.grad), 0.0, p.grad
+                    )
+
+            self.print("NaN values zeroed out!")
+
+        # now calculate the gnorm
         g_norm = torch.sqrt(
             sum(
                 p.grad.norm() ** 2
@@ -330,6 +354,8 @@ class VQPretrainer(nn.Module):
         )
         self.accelerator.log({"pre_clip_g_norm": g_norm}, step=steps)
 
+        # if the gnorm is smaller than max_grad_norm then clipping by gnorm is not done
+        # else the clipping of grads is done using gnorm
         if exists(self.max_grad_norm):
             self.accelerator.clip_grad_norm_(
                 self.model.parameters(), self.max_grad_norm
@@ -344,21 +370,9 @@ class VQPretrainer(nn.Module):
         )
         self.accelerator.log({"post_clip_g_norm": g_norm}, step=steps)
 
-        # we perform the below operation after computing gnorms, because we need logs for each step
-        nan_grads = False
-        for p in self.model.parameters():
-            if p.grad is not None and torch.isnan(p.grad).any():
-                nan_grads = True
-                break
-
-        # if gradients are nan then skip the update
-        if nan_grads:
-            self.print("NaN detected in gradients! Skipping optimization step.")
-        # else make the weight update
-        else:
-            self.optim.step()
-
-        # zero out the gradients as usual
+        # take a learning step and
+        # zero out all gradients as usual
+        self.optim.step()
         self.optim.zero_grad()
 
         # log
@@ -381,6 +395,7 @@ class VQPretrainer(nn.Module):
         if self.is_main and not (steps % self.save_results_every):
             x = next(self.valid_dl_iter)
 
+            # Disable grad calculation but keep the model in train mode so we can track losses
             # with torch.no_grad():
             # or
             with torch.inference_mode():

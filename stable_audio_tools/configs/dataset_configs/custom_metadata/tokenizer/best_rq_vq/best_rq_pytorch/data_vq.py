@@ -29,7 +29,7 @@ def exists(val):
 
 accelerator = "cuda"
 pretrained_checkpoint = (
-    "/home/chirag//audio_tokenizer/best_rq/runs/8/results/bestrq.100000.pt"
+    "/home/chirag//audio_tokenizer/best_rq/runs/8/results/bestrq.196000.pt"
 )
 
 pre_transform = BestRQ(
@@ -56,6 +56,9 @@ pre_transform = BestRQ(
 ).to(accelerator)
 
 pkg = pre_transform.load(pretrained_checkpoint)
+print("BEST-RQ is loaded on GPU!")
+pre_transform.eval()
+print("BEST-RQ is set to eval mode!")
 
 
 class AudioDataset(Dataset):
@@ -141,13 +144,13 @@ class AudioDataset(Dataset):
 # data loader utilities
 
 
+@torch.no_grad()
 def apply_transform(waves, output_layer=14, pre_transform=pre_transform):
     """Applies pre-transform on the GPU."""
-    with torch.no_grad():
-        activation = pre_transform(
-            (waves).to(accelerator),
-            return_layer_output=output_layer,
-        )
+    activation = pre_transform(
+        (waves).to(accelerator),
+        return_layer_output=output_layer,
+    )
     activation = activation.detach().cpu()
     return activation
 
