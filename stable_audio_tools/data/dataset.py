@@ -536,7 +536,8 @@ class S3WebDataLoader:
         if self.sample_size is not None:
             # Pad/crop and get the relative timestamp
             pad_crop = PadCrop_Normalized_T(
-                self.sample_size,
+                n_samples = self.sample_size,
+                max_n_samples = 32*self.sample_rate,
                 randomize=self.random_crop,
                 sample_rate=self.sample_rate,
             )
