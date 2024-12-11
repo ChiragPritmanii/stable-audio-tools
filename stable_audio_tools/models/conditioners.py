@@ -593,10 +593,13 @@ class BestRQConditioner(Conditioner):
 
     def forward(self, prompts: tp.List[dict], device: tp.Union[torch.device, str]) -> tp.Tuple[torch.Tensor, torch.Tensor]:
         self.proj_out.to(device) # 1280 -> 768
-
-        print(prompts)
-
-        prompts = [(prompt["path"], prompt["seconds_start"], prompt["seconds_total"]) for prompt in prompts]
+        
+        # sample propmts input:
+        # Note: path value is in a list, seconds_start and seconds_total values are put in a tensor, so there's some internal processing taking place, from custom_metadata output ot conditioning input
+        # [{'path': ['home/chirag/datasets/subset1/ins_1000308.wav'], 'seconds_start': tensor([128], device='cuda:0'), 'seconds_total': tensor([234], device='cuda:0')}, 
+        # {'path': ['home/chirag/datasets/subset1/ins_1001756.wav'], 'seconds_start': tensor([224], device='cuda:0'), 'seconds_total': tensor([317], device='cuda:0')}]
+        
+        prompts = [(prompt["path"][0], prompt["seconds_start"].item(), prompt["seconds_total"].item()) for prompt in prompts]
         wavs = []
         for p in prompts:
             print(p)
