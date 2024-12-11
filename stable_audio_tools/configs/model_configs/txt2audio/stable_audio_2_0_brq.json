@@ -146,7 +146,7 @@
             }
         },
         "demo": {
-            "demo_every": 100,
+            "demo_every": 50,
             "demo_steps": 250,
             "num_demos": 6,
             "display_audio_cond": true,
@@ -184,8 +184,8 @@
             ],
             "demo_cfg_scales": [
                 3,
-                6,
-                9
+                5,
+                7
             ]
         }
     }
