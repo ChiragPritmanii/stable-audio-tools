@@ -618,7 +618,7 @@ class BestRQConditioner(Conditioner):
                     embeddings.shape[0],
                     self.max_length - embeddings_ts, # (2378 - 1600)
                     embeddings.shape[2],
-                )
+                ).to(embeddings.device)
                 * -1,
             ],
             dim=1,
