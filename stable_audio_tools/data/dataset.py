@@ -691,7 +691,7 @@ class LocalWebDataLoader:
 
             if dataset.local_path in sample["__url__"]:
                 # custom_metadata = dataset.custom_metadata_fn(sample["json"], audio)
-                print(sample["__key__"], type(sample["__key__"]))
+                # print(sample["__key__"], type(sample["__key__"])) #..., str
                 custom_metadata = dataset.custom_metadata_fn(sample["__key__"], sample["json"], audio_trim)
                 sample["json"].update(custom_metadata)
 
