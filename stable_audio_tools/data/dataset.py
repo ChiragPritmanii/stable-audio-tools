@@ -633,6 +633,7 @@ class LocalWebDataLoader:
         )
 
     def wds_preprocess(self, sample):
+        print("sample:",sample)
 
         found_key, rewrite_key = "", ""
         for k, v in sample.items():  # print the all entries in dict
