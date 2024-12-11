@@ -149,6 +149,7 @@
             "demo_every": 100,
             "demo_steps": 250,
             "num_demos": 6,
+            "display_audio_cond": true,
             "demo_cond": [
                 {
                     "prompt": {"path":["/home/chirag/datasets/subset1/song_900887.wav"], "seconds_start": 32, "seconds_total": 172},

@@ -523,7 +523,7 @@ class TokenizerLUTConditioner(Conditioner):
 
 
 class PositionalEncoding:
-    def __init__(self, seq_length=2378, embedding_dim=256):
+    def __init__(self, seq_length=2378, embedding_dim=512):
         self.seq_length = seq_length
         self.embedding_dim = embedding_dim
 
@@ -568,7 +568,7 @@ class BestRQConditioner(Conditioner):
         use_positional_embedding: bool = True,
         device: str = "cuda",
     ):
-        super().__init__(dim=1280, output_dim=output_dim, project_out=project_out)
+        super().__init__(dim=1536, output_dim=output_dim, project_out=project_out)
       
         self.max_length = max_length
         self.codebook_indices = 16384
@@ -579,7 +579,7 @@ class BestRQConditioner(Conditioner):
         # to add positional encoding to the vectors
         self.use_positional_embedding = use_positional_embedding
         # the positions after 1600 are going to be ignored by the attenstion mask anyways
-        self.pos_embed = PositionalEncoding(seq_length=self.max_length, embedding_dim=256)
+        self.pos_embed = PositionalEncoding(seq_length=self.max_length, embedding_dim=512)
 
     def bestrq_preprocess(self, path, start):
         wav, sr = torchaudio.load(path)
@@ -592,7 +592,7 @@ class BestRQConditioner(Conditioner):
         return wav
 
     def forward(self, prompts: tp.List[dict], device: tp.Union[torch.device, str]) -> tp.Tuple[torch.Tensor, torch.Tensor]:
-        self.proj_out.to(device) # 1280 -> 768
+        self.proj_out.to(device) # 1536 -> 768
         
         # sample propmts input:
         # Note: path value is in a list, seconds_start and seconds_total values are put in a tensor, so there's some internal processing taking place, from custom_metadata output ot conditioning input

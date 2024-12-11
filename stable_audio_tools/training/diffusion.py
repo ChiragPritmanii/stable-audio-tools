@@ -544,11 +544,23 @@ class DiffusionCondDemoCallback(pl.Callback):
             cond_inputs = module.diffusion.get_conditioning_inputs(conditioning)
             log_dict = {}
             demo_data = [[demo_cond[0]['prompt']["path"][0], str(demo_cond[0]['seconds_start']), str(demo_cond[0]['seconds_total'])],
-                         [demo_cond[1]['prompt']["path"][0], str(demo_cond[1]['seconds_start']), str(demo_cond[1]['seconds_total'])]]
+                         [demo_cond[1]['prompt']["path"][0], str(demo_cond[1]['seconds_start']), str(demo_cond[1]['seconds_total'])],
+                         [demo_cond[2]['prompt']["path"][0], str(demo_cond[2]['seconds_start']), str(demo_cond[2]['seconds_total'])],
+                         [demo_cond[3]['prompt']["path"][0], str(demo_cond[3]['seconds_start']), str(demo_cond[3]['seconds_total'])],
+                         [demo_cond[4]['prompt']["path"][0], str(demo_cond[4]['seconds_start']), str(demo_cond[4]['seconds_total'])],
+                         [demo_cond[5]['prompt']["path"][0], str(demo_cond[5]['seconds_start']), str(demo_cond[5]['seconds_total'])]]
+            
             log_dict['demo_inputs'] = wandb.Table(columns=['prompt', 'seconds_start', 'seconds_total'], data = demo_data)
 
+            wavs = []
+            for path, start, _ in demo_data:
+                wav, sr = torchaudio.load(path)
+                wav = (wav[:, start*sr:(start+32)*sr]).unsqueeze(0)
+                wavs.append(wav)
+                            
             if self.display_audio_cond:
-                audio_inputs = torch.cat([cond["audio"] for cond in demo_cond], dim=0)
+                # audio_inputs = torch.cat([cond["audio"] for cond in demo_cond], dim=0)
+                audio_inputs = torch.cat(wavs, dim=0) # batch, channels, timesteps
                 audio_inputs = rearrange(audio_inputs, 'b d n -> d (b n)')
 
                 filename = f'demo_audio_cond_{trainer.global_step:08}.wav'
