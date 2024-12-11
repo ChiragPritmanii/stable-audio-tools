@@ -594,6 +594,8 @@ class BestRQConditioner(Conditioner):
     def forward(self, prompts: tp.List[dict], device: tp.Union[torch.device, str]) -> tp.Tuple[torch.Tensor, torch.Tensor]:
         self.proj_out.to(device) # 1280 -> 768
 
+        print(prompts)
+
         prompts = [(prompt["path"], prompt["seconds_start"], prompt["seconds_total"]) for prompt in prompts]
         wavs = []
         for p in prompts:
