@@ -579,7 +579,7 @@ class BestRQConditioner(Conditioner):
         # to add positional encoding to the vectors
         self.use_positional_embedding = use_positional_embedding
         # the positions after 1600 are going to be ignored by the attenstion mask anyways
-        self.pos_embed = PositionalEncoding(seq_length=2350, embedding_dim=256)
+        self.pos_embed = PositionalEncoding(seq_length=self.max_length, embedding_dim=256)
 
     def bestrq_preprocess(self, path, start):
         wav, sr = torchaudio.load(path)
