@@ -602,7 +602,6 @@ class BestRQConditioner(Conditioner):
         prompts = [(prompt["path"][0], prompt["seconds_start"].item(), prompt["seconds_total"].item()) for prompt in prompts]
         wavs = []
         for p in prompts:
-            print(p)
             wav = self.bestrq_preprocess(p[0], p[1])
             wavs.append(wav)
         wavs = torch.cat(wavs, dim=0)
