@@ -1,7 +1,8 @@
 def get_custom_metadata(info):
+    print(info.keys())
     return {
         "prompt": {
-            "path": info["relpath"],
+            "path": info["path"],
             "seconds_start": info["seconds_start"],
             "seconds_total": info["seconds_total"]
         }
