@@ -603,51 +603,60 @@ class BestRQConditioner(Conditioner):
         wavs = []
         for p in prompts:
             wav = self.bestrq_preprocess(p[0], p[1])
-            wavs.append(wav)
-        wavs = torch.cat(wavs, dim=0)
-
-        codes = self.audio_tokenizer.encode(wavs)  # b, t' (t' = t/480)
-        embeddings = F.embedding(codes, self.vq) # b, t', e (need to pad embeddings : (47-32)*50 = 750)
+            if wav.size(1)==768000:
+                wavs.append(wav)
         
-        embeddings_ts = embeddings.shape[1]
-        # multiply -1 to all embedding in the pad positions
-        embeddings = torch.cat(
-            [
-                embeddings,
-                torch.ones(
-                    embeddings.shape[0],
-                    self.max_length - embeddings_ts, # (2378 - 1600)
-                    embeddings.shape[2],
-                ).to(embeddings.device)
-                * -1,
-            ],
-            dim=1,
-        )  # b, t'', e (t'' = 2378)
+        if len(wavs)>0:
+            wavs = torch.cat(wavs, dim=0)
 
-        if self.use_positional_embedding:
-            pe = self.pos_embed(embeddings).to(embeddings.device)
+            codes = self.audio_tokenizer.encode(wavs)  # b, t' (t' = t/480)
+            embeddings = F.embedding(codes, self.vq) # b, t', e (need to pad embeddings : (47-32)*50 = 750)
+            
+            embeddings_ts = embeddings.shape[1]
+            # multiply -1 to all embedding in the pad positions
             embeddings = torch.cat(
-                [embeddings, pe.repeat(embeddings.shape[0], 1, 1)],
-                dim=-1,
-            )  # b, t'', e1+e2
+                [
+                    embeddings,
+                    torch.ones(
+                        embeddings.shape[0],
+                        self.max_length - embeddings_ts, # (2378 - 1600)
+                        embeddings.shape[2],
+                    ).to(embeddings.device)
+                    * -1,
+                ],
+                dim=1,
+            )  # b, t'', e (t'' = 2378)
 
-        # attend to all tokens
-        attention_mask = (
-            torch.ones((embeddings.shape[0], embeddings.shape[1]))
-            .to(device)
-            .to(torch.bool)
-        )  # b, t'' (bool)
+            if self.use_positional_embedding:
+                pe = self.pos_embed(embeddings).to(embeddings.device)
+                embeddings = torch.cat(
+                    [embeddings, pe.repeat(embeddings.shape[0], 1, 1)],
+                    dim=-1,
+                )  # b, t'', e1+e2
 
-        attention_mask[:, embeddings_ts:] = False
+            # attend to all tokens
+            attention_mask = (
+                torch.ones((embeddings.shape[0], embeddings.shape[1]))
+                .to(device)
+                .to(torch.bool)
+            )  # b, t'' (bool)
 
-        # it's suggested to concat pos_embed before projection so it influences the output (done)
-        embeddings = self.proj_out(embeddings)
+            attention_mask[:, embeddings_ts:] = False
 
-        # unsqueeze attention_mask to for b, t, 1 for broadcasting
-        embeddings = embeddings * attention_mask.unsqueeze(-1).float()
+            # it's suggested to concat pos_embed before projection so it influences the output (done)
+            embeddings = self.proj_out(embeddings)
+
+            # unsqueeze attention_mask to for b, t, 1 for broadcasting
+            embeddings = embeddings * attention_mask.unsqueeze(-1).float()
+        else:
+            embeddings = torch.zeros(2, 2378, 768)
+            attention_mask = (
+                torch.zeros((embeddings.shape[0], embeddings.shape[1]))
+                .to(device)
+                .to(torch.bool)
+            )  # b, t'' (bool)
 
         return embeddings, attention_mask
-
 
 class PretransformConditioner(Conditioner):
     """
