@@ -115,9 +115,9 @@ class AudioTokenizer(AbsTokenizer):
         brq_embed = self.best_rq(
             (waves).to(self.device), return_layer_output=self.output_layer
         )
-        brq_embed = brq_embed.detach().cpu()  # b, n, d
+        brq_embed = brq_embed.detach() #.cpu()  # b, n, d # let brq_embed stay on gpu
 
         codes = quant_mem_efficient(brq_embed, self.vq, True, 1024)  # b, n
-        codes = codes.cpu()
+        codes = codes # .cpu() let the codes stay on gpu as well
 
         return codes  # b, n
