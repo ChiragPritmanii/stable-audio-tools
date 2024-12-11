@@ -204,6 +204,7 @@ class SampleDataset(torch.utils.data.Dataset):
             info = {}
 
             info["path"] = audio_filename
+            print(audio_filename)
 
             if self.relpath is not None:
                 info["relpath"] = path.relpath(audio_filename, self.relpath)

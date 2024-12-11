@@ -1,4 +1,4 @@
-def get_custom_metadata(info):
+def get_custom_metadata(info, audio):
     print(info.keys())
     return {
         "prompt": {
