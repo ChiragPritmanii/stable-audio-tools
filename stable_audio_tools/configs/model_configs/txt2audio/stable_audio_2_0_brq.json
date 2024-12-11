@@ -151,12 +151,12 @@
             "num_demos": 4,
             "demo_cond": [
                 {
-                    "prompt": {"path":"/home/chirag/datasets/subset1/song_900887.wav", "seconds_start": 32, "seconds_total": 172},
+                    "prompt": {"path":["/home/chirag/datasets/subset1/song_900887.wav"], "seconds_start": 32, "seconds_total": 172},
                     "seconds_start": 32,
                     "seconds_total": 172
                 },
                 {
-                    "prompt": {"path":"/home/chirag/datasets/subset1/voc_106503.wav", "seconds_start": 64, "seconds_total": 156},
+                    "prompt": {"path":["/home/chirag/datasets/subset1/voc_106503.wav"], "seconds_start": 64, "seconds_total": 156},
                     "seconds_start": 64,
                     "seconds_total": 156
                 },
