@@ -525,6 +525,7 @@ class DiffusionCondDemoCallback(pl.Callback):
         demo_samples = self.demo_samples
 
         demo_cond = self.demo_conditioning
+        print(demo_cond, demo_samples)
 
         if self.demo_cond_from_batch:
             # Get metadata from the batch
@@ -541,7 +542,6 @@ class DiffusionCondDemoCallback(pl.Callback):
                 conditioning = module.diffusion.conditioner(demo_cond, module.device)
 
             cond_inputs = module.diffusion.get_conditioning_inputs(conditioning)
-
             log_dict = {}
             demo_data = [[demo_cond[0]['prompt'][0], str(demo_cond[0]['seconds_start'].item()), str(demo_cond[0]['seconds_total'].item())],
                          [demo_cond[1]['prompt'][0], str(demo_cond[1]['seconds_start'].item()), str(demo_cond[1]['seconds_total'].item())]]
