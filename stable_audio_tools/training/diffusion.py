@@ -543,8 +543,8 @@ class DiffusionCondDemoCallback(pl.Callback):
 
             cond_inputs = module.diffusion.get_conditioning_inputs(conditioning)
             log_dict = {}
-            demo_data = [[demo_cond[0]['prompt']["path"][0], str(demo_cond[0]['seconds_start'].item()), str(demo_cond[0]['seconds_total'].item())],
-                         [demo_cond[1]['prompt']["path"][0], str(demo_cond[1]['seconds_start'].item()), str(demo_cond[1]['seconds_total'].item())]]
+            demo_data = [[demo_cond[0]['prompt']["path"][0], str(demo_cond[0]['seconds_start']), str(demo_cond[0]['seconds_total'])],
+                         [demo_cond[1]['prompt']["path"][0], str(demo_cond[1]['seconds_start']), str(demo_cond[1]['seconds_total'])]]
             log_dict['demo_inputs'] = wandb.Table(columns=['prompt', 'seconds_start', 'seconds_total'], data = demo_data)
 
             if self.display_audio_cond:
