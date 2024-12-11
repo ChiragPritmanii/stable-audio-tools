@@ -1,47 +1,56 @@
-import random
+def get_custom_metadata(info):
+    return {
+        "prompt": {
+            "path": info["relpath"],
+            "seconds_start": info["seconds_start"],
+            "seconds_total": info["seconds_total"]
+        }
+    }
 
-import torch
-from einops import rearrange
-from torchaudio.functional import resample
+# import random
 
-from stable_audio_tools.configs.dataset_configs.custom_metadata.tokenizer.best_rq_vq.AudioTokenizer import AudioTokenizer
-import multiprocessing
-multiprocessing.set_start_method("spawn", force=True)
+# import torch
+# from einops import rearrange
+# from torchaudio.functional import resample
 
-# checkpoints on current vm
-best_rq_ckpt = "/home/chirag/models/tokenizer/bestrq.196000.pt"
-vq_ckpt = "/home/chirag/models/tokenizer/centroids.npy"
+# from stable_audio_tools.configs.dataset_configs.custom_metadata.tokenizer.best_rq_vq.AudioTokenizer import (
+#     AudioTokenizer,
+# )
 
-audio_tokenizer = AudioTokenizer(best_rq_ckpt=best_rq_ckpt, vq_ckpt=vq_ckpt)
+# # checkpoints on current vm
+# best_rq_ckpt = "/home/chirag/models/tokenizer/bestrq.196000.pt"
+# vq_ckpt = "/home/chirag/models/tokenizer/centroids.npy"
 
-def get_custom_metadata(info, audio):
+# audio_tokenizer = AudioTokenizer(best_rq_ckpt=best_rq_ckpt, vq_ckpt=vq_ckpt)
 
-    seconds_total = info["seconds_total"]
-    seconds_start = info["seconds_start"]
-    seconds_end = seconds_start + 32
-    ranges = [(i, i + 32) for i in range(0, seconds_total, 32)]
-    start_range = [ran for ran in ranges if seconds_start in range(ran[0], ran[1])]
-    end_range = [ran for ran in ranges if seconds_end in range(ran[0], ran[1])]
-    token_range = start_range + end_range
+# def get_custom_metadata(info, audio):
 
-    # audio -> c, t -> 2, sr*seconds_total
-    if audio.size(0) > 1:
-        audio = audio.mean(dim=0, keepdim=True)  # 1, t
+#     seconds_total = info["seconds_total"]
+#     seconds_start = info["seconds_start"]
+#     seconds_end = seconds_start + 32
+#     ranges = [(i, i + 32) for i in range(0, seconds_total, 32)]
+#     start_range = [ran for ran in ranges if seconds_start in range(ran[0], ran[1])]
+#     end_range = [ran for ran in ranges if seconds_end in range(ran[0], ran[1])]
+#     token_range = start_range + end_range
 
-    # resample data to the audio tokenizer's input sr
-    audio = resample(
-        audio, orig_freq=44100, new_freq=audio_tokenizer.sr
-    )  # audio -> 1, t
+#     # audio -> c, t -> 2, sr*seconds_total
+#     if audio.size(0) > 1:
+#         audio = audio.mean(dim=0, keepdim=True)  # 1, t
 
-    # we only get the codes of unpadded part
-    waves = torch.cat([audio[:, ran[0] : ran[1]] for ran in token_range], dim=0)  # b, t
-    # the output may be stored in a json and tensor isn't json serializable
-    # so consider storing as a list
+#     # resample data to the audio tokenizer's input sr
+#     audio = resample(
+#         audio, orig_freq=44100, new_freq=audio_tokenizer.sr
+#     )  # audio -> 1, t
 
-    start_code = (seconds_start - start_range[0][0]) * 50
-    codes = audio_tokenizer.encode(waves)  # b, t_ (i.e. t/480)
-    codes = rearrange(codes, "b t -> (b t)")  # 1, t_
-    codes = codes[start_code : start_code + 1600]
-    codes = codes.tolist()
+#     # we only get the codes of unpadded part
+#     waves = torch.cat([audio[:, ran[0] : ran[1]] for ran in token_range], dim=0)  # b, t
+#     # the output may be stored in a json and tensor isn't json serializable
+#     # so consider storing as a list
 
-    return {"tokens": codes}
+#     start_code = (seconds_start - start_range[0][0]) * 50
+#     codes = audio_tokenizer.encode(waves)  # b, t_ (i.e. t/480)
+#     codes = rearrange(codes, "b t -> (b t)")  # 1, t_
+#     codes = codes[start_code : start_code + 1600]
+#     codes = codes.tolist()
+
+#     return {"tokens": codes}

@@ -15,8 +15,13 @@ from .utils import load_ckpt_state_dict
 
 import math
 import numpy as np
+from einops import rearrange
+import torchaudio
 from torch import nn
 import torch.nn.functional as F
+from torchaudio.functional import resample
+
+from stable_audio_tools.configs.dataset_configs.custom_metadata.tokenizer.best_rq_vq.AudioTokenizer import AudioTokenizer
 
 # // The cond_dim property is used to enforce the same dimension on all conditioning inputs, 
 # // however that can be overridden with an explicit output_dim property on any of the individual configs.
@@ -542,9 +547,6 @@ class PositionalEncoding:
         # return positional embeddings
         return self.pe[:, : x.size(1)]
 
-
-# we may need to add positional information to the token embeddings here
-# we may need to pad the codes to 47s worth tokens
 class BestRQConditioner(Conditioner):
     """
     A conditioner that embeds text using a lookup table on a pretrained tokenizer's vocabulary
@@ -558,74 +560,84 @@ class BestRQConditioner(Conditioner):
 
     def __init__(
         self,
+        best_rq_ckpt: str,
         vq_ckpt: str,
-        output_dim: int = 1280,
+        output_dim: int = 768, # we need to make sure that we are connecting to the same dimension as the cond_dim, during diff cond_dim (768)-> embed_dim (1536)
         max_length: int = 2378, # actual duration is 47.55
-        project_out: bool = False,
+        project_out: bool = True,
         use_positional_embedding: bool = True,
         device: str = "cuda",
     ):
-        super().__init__(output_dim, output_dim, project_out=project_out)
-        
+        super().__init__(dim=1280, output_dim=output_dim, project_out=project_out)
+      
         self.max_length = max_length
         self.codebook_indices = 16384
-
+        # for obtaining the codes
+        self.audio_tokenizer = AudioTokenizer(best_rq_ckpt=best_rq_ckpt, vq_ckpt=vq_ckpt)
+        # for unquantizing
         self.vq = torch.tensor(np.load(vq_ckpt)).to(device)
+        # to add positional encoding to the vectors
         self.use_positional_embedding = use_positional_embedding
         # the positions after 1600 are going to be ignored by the attenstion mask anyways
         self.pos_embed = PositionalEncoding(seq_length=2350, embedding_dim=256)
 
-    def forward(
-        self, codes: tp.List[tp.List[int]], device: tp.Union[torch.device, str]
-    ) -> tp.Tuple[torch.Tensor, torch.Tensor]:
+    def bestrq_preprocess(self, path, start):
+        wav, sr = torchaudio.load(path)
+        start_sample = start*sr
+        end_sample = (start+32)*sr
+        wav = wav[:, start_sample:end_sample]
+        if wav.size(0) > 1:
+            wav = wav.mean(dim=0, keepdim=True)  # 1, t
+        wav = resample(wav, orig_freq=44100, new_freq=self.audio_tokenizer.sr)  # 1, t
+        return wav
+
+    def forward(self, prompts: tp.List[tp.List[dict]], device: tp.Union[torch.device, str]) -> tp.Tuple[torch.Tensor, torch.Tensor]:
         self.proj_out.to(device)
 
-        input_ids = torch.tensor(codes)  # b, t
-        # embeddings = F.embedding(input_ids, self.vq)
-        embeddings = self.vq[
-            input_ids, :
-        ]  # b, t, e (need to pad embeddings : (47-32)*50 = 750)
+        prompts = [(prompt["path"], prompt["seconds_start"], prompt["seconds_total"]) for prompt in prompts]
+        wavs = []
+        for prompt in prompts: 
+            wav = self.bestrq_preprocess(prompt[0], prompt[1])
+            wavs.append(wav)
+        wavs = torch.cat(wavs, dim=0)
 
-        embeddings_seqlen = embeddings.shape[1]
-
+        codes = self.audio_tokenizer.encode(wavs)  # b, t' (t' = t/480)
+        embeddings = F.embedding(codes, self.vq) # b, t', e (need to pad embeddings : (47-32)*50 = 750)
+        
+        embeddings_ts = embeddings.shape[1]
         # multiply -1 to all embedding in the pad positions
         embeddings = torch.cat(
             [
                 embeddings,
                 torch.ones(
                     embeddings.shape[0],
-                    self.max_length - embeddings.shape[1], # 2350 - 1600 = 750
+                    self.max_length - embeddings_ts, # (2378 - 1600)
                     embeddings.shape[2],
                 )
                 * -1,
             ],
             dim=1,
-        )  # b, 2350, e
+        )  # b, t'', e (t'' = 2378)
 
         if self.use_positional_embedding:
             pe = self.pos_embed(embeddings).to(embeddings.device)
             embeddings = torch.cat(
                 [embeddings, pe.repeat(embeddings.shape[0], 1, 1)],
                 dim=-1,
-            )  # b, t, e1+e2
+            )  # b, t'', e1+e2
 
         # attend to all tokens
         attention_mask = (
             torch.ones((embeddings.shape[0], embeddings.shape[1]))
             .to(device)
             .to(torch.bool)
-        )  # b, t (bool)
+        )  # b, t'' (bool)
 
-        attention_mask[:, embeddings_seqlen:] = False
+        attention_mask[:, embeddings_ts:] = False
 
+        # it's suggested to concat pos_embed before projection so it influences the output (done)
         embeddings = self.proj_out(embeddings)
 
-        if self.use_positional_embedding:
-            pe = self.pos_embed(representation_quant).to(representation_quant.device)
-            representation_quant = torch.cat(
-                [representation_quant, pe.repeat(representation_quant.size(0), 1, 1)],
-                dim=-1,
-            )  # b, t, e1+e2
         # unsqueeze attention_mask to for b, t, 1 for broadcasting
         embeddings = embeddings * attention_mask.unsqueeze(-1).float()
 

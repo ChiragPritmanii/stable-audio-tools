@@ -70,7 +70,7 @@
                     "id": "tokens",
                     "type": "brq",
                     "config": {
-                        "output_dim": 1280,
+                        "output_dim": 768,
                         "max_length": 2378,
                         "use_positional_embedding": true
 

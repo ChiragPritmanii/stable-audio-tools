@@ -536,8 +536,8 @@ class S3WebDataLoader:
         if self.sample_size is not None:
             # Pad/crop and get the relative timestamp
             pad_crop = PadCrop_Normalized_T(
-                n_samples = self.sample_size,
-                max_n_samples = 32*self.sample_rate,
+                n_samples=self.sample_size,
+                max_n_samples=32 * self.sample_rate,
                 randomize=self.random_crop,
                 sample_rate=self.sample_rate,
             )
@@ -655,8 +655,8 @@ class LocalWebDataLoader:
         if self.sample_size is not None:
             # Pad/crop and get the relative timestamp
             pad_crop = PadCrop_Normalized_T(
-                n_samples = self.sample_size,
-                max_n_samples = 32*self.sample_rate,
+                n_samples=self.sample_size,
+                max_n_samples=32 * self.sample_rate,
                 randomize=self.random_crop,
                 sample_rate=self.sample_rate,
             )
@@ -691,7 +691,8 @@ class LocalWebDataLoader:
                 continue
 
             if dataset.local_path in sample["__url__"]:
-                custom_metadata = dataset.custom_metadata_fn(sample["json"], audio)
+                # custom_metadata = dataset.custom_metadata_fn(sample["json"], audio)
+                custom_metadata = dataset.custom_metadata_fn(sample["json"])
                 sample["json"].update(custom_metadata)
 
         if (
