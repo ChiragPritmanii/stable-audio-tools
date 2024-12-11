@@ -591,13 +591,14 @@ class BestRQConditioner(Conditioner):
         wav = resample(wav, orig_freq=44100, new_freq=self.audio_tokenizer.sr)  # 1, t
         return wav
 
-    def forward(self, prompts: tp.List[tp.List[dict]], device: tp.Union[torch.device, str]) -> tp.Tuple[torch.Tensor, torch.Tensor]:
+    def forward(self, prompts: tp.List[dict], device: tp.Union[torch.device, str]) -> tp.Tuple[torch.Tensor, torch.Tensor]:
         self.proj_out.to(device) # 1280 -> 768
 
         prompts = [(prompt["path"], prompt["seconds_start"], prompt["seconds_total"]) for prompt in prompts]
         wavs = []
-        for prompt in prompts: 
-            wav = self.bestrq_preprocess(prompt[0], prompt[1])
+        for p in prompts:
+            print(p)
+            wav = self.bestrq_preprocess(p[0], p[1])
             wavs.append(wav)
         wavs = torch.cat(wavs, dim=0)
 
