@@ -97,7 +97,7 @@
         },
         "diffusion": {
             "cross_attention_cond_ids": [
-                "tokens",
+                "prompt",
                 "seconds_start",
                 "seconds_total"
             ],

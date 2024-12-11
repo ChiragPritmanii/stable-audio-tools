@@ -523,7 +523,7 @@ class TokenizerLUTConditioner(Conditioner):
 
 
 class PositionalEncoding:
-    def __init__(self, seq_length=2350, embedding_dim=256):
+    def __init__(self, seq_length=2378, embedding_dim=256):
         self.seq_length = seq_length
         self.embedding_dim = embedding_dim
 
