@@ -72,8 +72,8 @@
                     "config": {
                         "output_dim": 768,
                         "max_length": 2378,
+                        "project_out": true,
                         "use_positional_embedding": true
-
                     }
                 },
                 {

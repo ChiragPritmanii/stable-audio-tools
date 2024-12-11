@@ -592,7 +592,7 @@ class BestRQConditioner(Conditioner):
         return wav
 
     def forward(self, prompts: tp.List[tp.List[dict]], device: tp.Union[torch.device, str]) -> tp.Tuple[torch.Tensor, torch.Tensor]:
-        self.proj_out.to(device)
+        self.proj_out.to(device) # 1280 -> 768
 
         prompts = [(prompt["path"], prompt["seconds_start"], prompt["seconds_total"]) for prompt in prompts]
         wavs = []
@@ -779,9 +779,13 @@ def create_multi_conditioner_from_conditioning_config(
         elif conditioner_type == "lut":
             conditioners[id] = TokenizerLUTConditioner(**conditioner_config)
         elif conditioner_type == "brq":
-            conditioners[id] = BestRQConditioner(vq_ckpt="/home/chirag/models/tokenizer/centroids.npy", 
+            conditioners[id] = BestRQConditioner(best_rq_ckpt="/home/chirag/models/tokenizer/bestrq.196000.pt", 
+                                                 vq_ckpt="/home/chirag/models/tokenizer/centroids.npy", 
                                                  max_length=2378, 
-                                                 output_dim=1280)
+                                                 output_dim=768,
+                                                 project_out = True,
+                                                 use_positional_embedding = True,
+                                                 device = "cuda")
         elif conditioner_type == "pretransform":
             sample_rate = conditioner_config.pop("sample_rate", None)
             assert (
