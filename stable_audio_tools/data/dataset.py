@@ -633,8 +633,6 @@ class LocalWebDataLoader:
         )
 
     def wds_preprocess(self, sample):
-        print("sample:",sample)
-
         found_key, rewrite_key = "", ""
         for k, v in sample.items():  # print the all entries in dict
             for akey in AUDIO_KEYS:
@@ -692,9 +690,8 @@ class LocalWebDataLoader:
                 continue
 
             if dataset.local_path in sample["__url__"]:
-                print(sample["__url__"])
                 # custom_metadata = dataset.custom_metadata_fn(sample["json"], audio)
-                custom_metadata = dataset.custom_metadata_fn(sample["json"], audio_trim)
+                custom_metadata = dataset.custom_metadata_fn(sample["__key__"], sample["json"], audio_trim)
                 sample["json"].update(custom_metadata)
 
         if (

@@ -1,8 +1,7 @@
-def get_custom_metadata(info, audio):
-    print(info.keys())
+def get_custom_metadata(fpath, info, audio):
     return {
         "prompt": {
-            "path": info["path"],
+            "path": f"{fpath}+.wav",
             "seconds_start": info["seconds_start"],
             "seconds_total": info["seconds_total"]
         }
