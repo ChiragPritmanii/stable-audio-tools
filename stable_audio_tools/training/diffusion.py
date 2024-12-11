@@ -555,7 +555,7 @@ class DiffusionCondDemoCallback(pl.Callback):
             wavs = []
             for path, start, _ in demo_data:
                 wav, sr = torchaudio.load(path)
-                wav = (wav[:, start*sr:(start+32)*sr]).unsqueeze(0)
+                wav = (wav[:, int(start)*sr:(int(start)+32)*sr]).unsqueeze(0)
                 wavs.append(wav)
                             
             if self.display_audio_cond:
