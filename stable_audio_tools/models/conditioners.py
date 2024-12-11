@@ -599,7 +599,7 @@ class BestRQConditioner(Conditioner):
         # [{'path': ['home/chirag/datasets/subset1/ins_1000308.wav'], 'seconds_start': tensor([128], device='cuda:0'), 'seconds_total': tensor([234], device='cuda:0')}, 
         # {'path': ['home/chirag/datasets/subset1/ins_1001756.wav'], 'seconds_start': tensor([224], device='cuda:0'), 'seconds_total': tensor([317], device='cuda:0')}]
         
-        prompts = [(prompt["path"][0], prompt["seconds_start"].item(), prompt["seconds_total"].item()) for prompt in prompts]
+        prompts = [(prompt["path"][0], prompt["seconds_start"], prompt["seconds_total"]) for prompt in prompts]
         wavs = []
         for p in prompts:
             wav = self.bestrq_preprocess(p[0], p[1])
