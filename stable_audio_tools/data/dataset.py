@@ -450,6 +450,7 @@ class LocalDatasetConfig:
 def audio_decoder(key, value):
     # Get file extension from key
     ext = key.split(".")[-1]
+    print(key)
 
     if ext in AUDIO_KEYS:
         return torchaudio.load(io.BytesIO(value), backend="ffmpeg")
@@ -693,7 +694,7 @@ class LocalWebDataLoader:
 
             if dataset.local_path in sample["__url__"]:
                 # custom_metadata = dataset.custom_metadata_fn(sample["json"], audio)
-                custom_metadata = dataset.custom_metadata_fn(sample["json"])
+                custom_metadata = dataset.custom_metadata_fn(sample["json"], audio_trim)
                 sample["json"].update(custom_metadata)
 
         if (
