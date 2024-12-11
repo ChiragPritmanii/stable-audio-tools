@@ -569,7 +569,8 @@ class BestRQConditioner(Conditioner):
         device: str = "cuda",
     ):
         super().__init__(dim=1536, output_dim=output_dim, project_out=project_out)
-      
+
+        self.output_dim = output_dim
         self.max_length = max_length
         self.codebook_indices = 16384
         # for obtaining the codes
@@ -649,12 +650,13 @@ class BestRQConditioner(Conditioner):
             # unsqueeze attention_mask to for b, t, 1 for broadcasting
             embeddings = embeddings * attention_mask.unsqueeze(-1).float()
         else:
-            embeddings = torch.zeros(2, 2378, 768)
+            embeddings = torch.ones(len(prompts), self.max_length, self.output_dim)
             attention_mask = (
                 torch.zeros((embeddings.shape[0], embeddings.shape[1]))
                 .to(device)
                 .to(torch.bool)
             )  # b, t'' (bool)
+            embeddings = embeddings * attention_mask.unsqueeze(-1).float()
 
         return embeddings, attention_mask
 
