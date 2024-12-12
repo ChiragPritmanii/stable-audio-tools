@@ -185,7 +185,7 @@ class DiffusionUncondDemoCallback(pl.Callback):
             fakes = rearrange(fakes, 'b d n -> d (b n)')
 
             log_dict = {}
-            
+
             filename = f'demo_{trainer.global_step:08}.wav'
             fakes = fakes.to(torch.float32).div(torch.max(torch.abs(fakes))).mul(32767).to(torch.int16).cpu()
             torchaudio.save(filename, fakes, self.sample_rate)
@@ -557,13 +557,15 @@ class DiffusionCondDemoCallback(pl.Callback):
                 wav, sr = torchaudio.load(path)
                 wav = (wav[:, int(start)*sr:(int(start)+32)*sr]).unsqueeze(0)
                 wavs.append(wav)
-                            
+
+            tmp_dir = "/home/chirag/models/diffusion/runs/outputs/"
+
             if self.display_audio_cond:
                 # audio_inputs = torch.cat([cond["audio"] for cond in demo_cond], dim=0)
                 audio_inputs = torch.cat(wavs, dim=0) # batch, channels, timesteps
                 audio_inputs = rearrange(audio_inputs, 'b d n -> d (b n)')
 
-                filename = f'demo_audio_cond_{trainer.global_step:08}.wav'
+                filename = f'{tmp_dir}demo_audio_cond_{trainer.global_step:08}.wav'
                 audio_inputs = audio_inputs.to(torch.float32).mul(32767).to(torch.int16).cpu()
                 torchaudio.save(filename, audio_inputs, self.sample_rate)
                 log_dict[f'demo_audio_cond'] = wandb.Audio(filename, sample_rate=self.sample_rate, caption="Audio conditioning")
@@ -586,7 +588,7 @@ class DiffusionCondDemoCallback(pl.Callback):
 
                 # log_dict = {}
                 
-                filename = f'demo_cfg_{cfg_scale}_{trainer.global_step:08}.wav'
+                filename = f'{tmp_dir}demo_cfg_{cfg_scale}_{trainer.global_step:08}.wav'
                 fakes = fakes.to(torch.float32).div(torch.max(torch.abs(fakes))).mul(32767).to(torch.int16).cpu()
                 torchaudio.save(filename, fakes, self.sample_rate)
 
