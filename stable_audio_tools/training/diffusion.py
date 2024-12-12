@@ -546,7 +546,7 @@ class DiffusionCondDemoCallback(pl.Callback):
             demo_data = [[demo_cond[0]['prompt']["path"][0], str(demo_cond[0]['seconds_start']), str(demo_cond[0]['seconds_total'])],
                          [demo_cond[1]['prompt']["path"][0], str(demo_cond[1]['seconds_start']), str(demo_cond[1]['seconds_total'])],
                          [demo_cond[2]['prompt']["path"][0], str(demo_cond[2]['seconds_start']), str(demo_cond[2]['seconds_total'])],
-                         [demo_cond[3]['prompt']["path"][0], str(demo_cond[3]['seconds_start']), str(demo_cond[3]['seconds_total'])],]
+                         [demo_cond[3]['prompt']["path"][0], str(demo_cond[3]['seconds_start']), str(demo_cond[3]['seconds_total'])]]
                         #  [demo_cond[4]['prompt']["path"][0], str(demo_cond[4]['seconds_start']), str(demo_cond[4]['seconds_total'])],
                         #  [demo_cond[5]['prompt']["path"][0], str(demo_cond[5]['seconds_start']), str(demo_cond[5]['seconds_total'])]]
             
