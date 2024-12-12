@@ -152,34 +152,24 @@
             "display_audio_cond": true,
             "demo_cond": [
                 {
-                    "prompt": {"path":["/home/chirag/datasets/subset1/song_900887.wav"], "seconds_start": 32, "seconds_total": 172},
+                    "prompt": {"path":["/home/chirag/datasets/subset2/voc_1133365.wav"], "seconds_start": 32, "seconds_total": 377},
                     "seconds_start": 32,
-                    "seconds_total": 172
+                    "seconds_total": 377
                 },
                 {
-                    "prompt": {"path":["/home/chirag/datasets/subset1/voc_106503.wav"], "seconds_start": 0, "seconds_total": 156},
-                    "seconds_start": 0,
-                    "seconds_total": 156
-                },
-                {
-                    "prompt": {"path":["/home/chirag/datasets/subset1/ins_427724.wav"], "seconds_start": 64, "seconds_total": 221},
-                    "seconds_start": 64,
-                    "seconds_total": 221
-                },
-                {
-                    "prompt": {"path":["/home/chirag/datasets/subset1/song_4081803.wav"], "seconds_start": 32, "seconds_total": 182},
+                    "prompt": {"path":["/home/chirag/datasets/subset2/voc_195406.wav"], "seconds_start": 32, "seconds_total": 274},
                     "seconds_start": 32,
-                    "seconds_total": 182
+                    "seconds_total": 274
                 },
                 {
-                    "prompt": {"path":["/home/chirag/datasets/subset1/ins_463936.wav"], "seconds_start": 64, "seconds_total": 207},
-                    "seconds_start": 64,
-                    "seconds_total": 207
+                    "prompt": {"path":["/home/chirag/datasets/subset2/voc_151431.wav"], "seconds_start": 32, "seconds_total": 181},
+                    "seconds_start": 32,
+                    "seconds_total": 181
                 },
                 {
-                    "prompt": {"path":["/home/chirag/datasets/subset1/voc_2959285.wav"], "seconds_start": 32, "seconds_total": 223},
-                    "seconds_start":32,
-                    "seconds_total": 223
+                    "prompt": {"path":["/home/chirag/datasets/subset2/voc_65825.wav"], "seconds_start": 32, "seconds_total": 185},
+                    "seconds_start": 32,
+                    "seconds_total": 185
                 }
             ],
             "demo_cfg_scales": [
