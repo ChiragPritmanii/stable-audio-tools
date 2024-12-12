@@ -148,7 +148,7 @@
         "demo": {
             "demo_every": 100,
             "demo_steps": 250,
-            "num_demos": 6,
+            "num_demos": 4,
             "display_audio_cond": true,
             "demo_cond": [
                 {
