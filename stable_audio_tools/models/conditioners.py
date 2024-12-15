@@ -649,7 +649,7 @@ class BestRQConditioner(Conditioner):
 
         # unsqueeze attention_mask to for b, t, 1 for broadcasting
         embeddings = embeddings * attention_mask.unsqueeze(-1).float()
-        
+
         # might need later:
         # embeddings = torch.ones(len(prompts), self.max_length, self.output_dim)
         # attention_mask = (
