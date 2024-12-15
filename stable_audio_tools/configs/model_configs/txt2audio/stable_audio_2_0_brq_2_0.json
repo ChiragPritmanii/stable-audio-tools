@@ -81,7 +81,8 @@
                     "type": "number",
                     "config": {
                         "min_val": 0,
-                        "max_val": 512
+                        "max_val": 512,
+                        "output_dim": 768
                     }
                 },
                 {
@@ -89,11 +90,12 @@
                     "type": "number",
                     "config": {
                         "min_val": 0,
-                        "max_val": 512
+                        "max_val": 512,
+                        "output_dim": 768
                     }
                 }
             ],
-            "cond_dim": 768
+            "cond_dim": 1536
         },
         "diffusion": {
             "cross_attention_cond_ids": ["prompt"],
@@ -104,7 +106,7 @@
                 "embed_dim": 1536,
                 "depth": 24,
                 "num_heads": 24,
-                "cond_token_dim": 768,
+                "cond_token_dim": 1536,
                 "global_cond_dim": 1536,
                 "project_cond_tokens": false,
                 "transformer_type": "continuous_transformer"
