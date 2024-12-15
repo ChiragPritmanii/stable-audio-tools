@@ -562,7 +562,7 @@ class BestRQConditioner(Conditioner):
         self,
         best_rq_ckpt: str,
         vq_ckpt: str,
-        output_dim: int = 768, # we need to make sure that we are connecting to the same dimension as the cond_dim, during diff cond_dim (768)-> embed_dim (1536)
+        output_dim: int = 1536, # we need to make sure that we are connecting to the same dimension as the cond_dim, during diff cond_dim (768)-> embed_dim (1536)
         max_length: int = 2378, # actual duration is 47.55
         project_out: bool = True,
         use_positional_embedding: bool = True,
@@ -774,6 +774,8 @@ def create_multi_conditioner_from_conditioning_config(
 
         conditioner_type = conditioner_info["type"]
 
+        # output_dim is set to cond_dim i.e. 768 for all conditioners 
+        # but we can avoid doing that with brq conditioner by adding specific output_dim value to it
         conditioner_config = {"output_dim": cond_dim}
 
         conditioner_config.update(
@@ -798,8 +800,8 @@ def create_multi_conditioner_from_conditioning_config(
             conditioners[id] = BestRQConditioner(best_rq_ckpt="/home/chirag/models/tokenizer/bestrq.196000.pt", 
                                                  vq_ckpt="/home/chirag/models/tokenizer/centroids.npy", 
                                                  max_length=2378, 
-                                                 output_dim=768,
-                                                 project_out = True,
+                                                 output_dim=1536,
+                                                 project_out = False,
                                                  use_positional_embedding = True,
                                                  device = "cuda")
         elif conditioner_type == "pretransform":

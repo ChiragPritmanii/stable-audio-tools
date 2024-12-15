@@ -150,7 +150,7 @@ class DiffusionTransformer(nn.Module):
             # Project the global conditioning to the embedding dimension
             global_embed = self.to_global_embed(global_embed)
 
-        prepend_inputs = None 
+        prepend_inputs = None
         prepend_mask = None
         prepend_length = 0
         if prepend_cond is not None:

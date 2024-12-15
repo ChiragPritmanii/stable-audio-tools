@@ -5,6 +5,8 @@ import torch
 import torchaudio
 import typing as tp
 import wandb
+from glob import glob
+from pydub.utils import mediainfo
 
 from aeiou.viz import pca_point_cloud, audio_spectrogram_image, tokens_spectrogram_image
 import auraloss
@@ -404,7 +406,9 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
 
         with torch.cuda.amp.autocast():
             p.tick("amp")
-            v = self.diffusion(noised_inputs, t, cond=conditioning, cfg_dropout_prob = 0.1, **extra_args)
+            # cfg dropout is only used during training to support uncondtional guidance
+            v = self.diffusion(noised_inputs, t, cond=conditioning, cfg_dropout_prob = 0., **extra_args)
+            # v = self.diffusion(noised_inputs, t, cond=conditioning, cfg_dropout_prob = 0.1, **extra_args)
             p.tick("diffusion")
 
             loss_info.update({
@@ -489,7 +493,7 @@ class DiffusionCondDemoCallback(pl.Callback):
                  demo_steps=250,
                  sample_rate=48000,
                  demo_conditioning: tp.Optional[tp.Dict[str, tp.Any]] = {},
-                 demo_cfg_scales: tp.Optional[tp.List[int]] = [3, 5, 7],
+                 demo_cfg_scales: tp.Optional[tp.List[int]] = [1, 8, 12],
                  demo_cond_from_batch: bool = False,
                  display_audio_cond: bool = False
     ):
@@ -536,6 +540,9 @@ class DiffusionCondDemoCallback(pl.Callback):
 
         noise = torch.randn([self.num_demos, module.diffusion.io_channels, demo_samples]).to(module.device)
 
+        subset_dir = None
+        random_samples = True
+        
         try:
             print("Getting conditioning")
             with torch.cuda.amp.autocast():
@@ -543,13 +550,19 @@ class DiffusionCondDemoCallback(pl.Callback):
 
             cond_inputs = module.diffusion.get_conditioning_inputs(conditioning)
             log_dict = {}
-            demo_data = [[demo_cond[0]['prompt']["path"][0], str(demo_cond[0]['seconds_start']), str(demo_cond[0]['seconds_total'])],
-                         [demo_cond[1]['prompt']["path"][0], str(demo_cond[1]['seconds_start']), str(demo_cond[1]['seconds_total'])],
-                         [demo_cond[2]['prompt']["path"][0], str(demo_cond[2]['seconds_start']), str(demo_cond[2]['seconds_total'])],
-                         [demo_cond[3]['prompt']["path"][0], str(demo_cond[3]['seconds_start']), str(demo_cond[3]['seconds_total'])]]
-                        #  [demo_cond[4]['prompt']["path"][0], str(demo_cond[4]['seconds_start']), str(demo_cond[4]['seconds_total'])],
-                        #  [demo_cond[5]['prompt']["path"][0], str(demo_cond[5]['seconds_start']), str(demo_cond[5]['seconds_total'])]]
-            
+            if random_samples:
+                assert subset_dir!=None
+                subset_files = glob(subset_dir+"/*wav")
+                random_files = random.choices(subset_files, k=4)
+                files_seconds_total = [str(int(mediainfo(f)['duration'])) for f in random_files]
+                files_seconds_start = [str(32)]*4
+                demo_data = list(zip(random_files, files_seconds_start, files_seconds_total))
+            else:
+                demo_data = [[demo_cond[0]['prompt']["path"][0], str(demo_cond[0]['seconds_start']), str(demo_cond[0]['seconds_total'])],
+                            [demo_cond[1]['prompt']["path"][0], str(demo_cond[1]['seconds_start']), str(demo_cond[1]['seconds_total'])],
+                            [demo_cond[2]['prompt']["path"][0], str(demo_cond[2]['seconds_start']), str(demo_cond[2]['seconds_total'])],
+                            [demo_cond[3]['prompt']["path"][0], str(demo_cond[3]['seconds_start']), str(demo_cond[3]['seconds_total'])]]
+                
             log_dict['demo_inputs'] = wandb.Table(columns=['prompt', 'seconds_start', 'seconds_total'], data = demo_data)
 
             wavs = []
@@ -558,7 +571,7 @@ class DiffusionCondDemoCallback(pl.Callback):
                 wav = (wav[:, int(start)*sr:(int(start)+32)*sr]).unsqueeze(0)
                 wavs.append(wav)
 
-            tmp_dir = "/home/chirag/models/diffusion/runs/outputs/"
+            tmp_dir = "/home/chirag/models/diffusion/runs/outputs/1/"
 
             if self.display_audio_cond:
                 # audio_inputs = torch.cat([cond["audio"] for cond in demo_cond], dim=0)
