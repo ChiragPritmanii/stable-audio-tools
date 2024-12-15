@@ -559,7 +559,7 @@ class DiffusionCondDemoCallback(pl.Callback):
                 assert subset_dir!=None
                 subset_files = glob(subset_dir+"/*wav")
                 random_files = random.choices(subset_files, k=4)
-                files_seconds_total = [str(int(mediainfo(f)['duration'])) for f in random_files]
+                files_seconds_total = [str(int(float(mediainfo(f)['duration']))) for f in random_files]
                 files_seconds_start = [str(32)]*4
                 demo_data = list(zip(random_files, files_seconds_start, files_seconds_total))
             else:
