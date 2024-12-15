@@ -72,7 +72,7 @@
                     "config": {
                         "output_dim": 1536,
                         "max_length": 2378,
-                        "project_out": true,
+                        "project_out": false,
                         "use_positional_embedding": true,
                         "pos_emb_dim": 512
                     }
@@ -142,28 +142,28 @@
             }
         },
         "demo": {
-            "demo_every": 100,
-            "demo_steps": 250,
+            "demo_every": 250,
+            "demo_steps": 200,
             "num_demos": 4,
             "display_audio_cond": true,
             "demo_cond": [
                 {
-                    "prompt": {"path":["/home/chirag/datasets/subset2/voc_195406.wav"], "seconds_start": 32, "seconds_total": 274},
+                    "prompt": {"path":["/home/chirag/datasets/subset4/voc_692994.wav"], "seconds_start": 32, "seconds_total": 336},
                     "seconds_start": 32,
                     "seconds_total": 274
                 },
                 {
-                    "prompt": {"path":["/home/chirag/datasets/subset2/voc_4766797.wav"], "seconds_start": 32, "seconds_total": 230},
+                    "prompt": {"path":["/home/chirag/datasets/subset4/voc_859104.wav"], "seconds_start": 32, "seconds_total": 137},
                     "seconds_start": 32,
                     "seconds_total": 230
                 },
                 {
-                    "prompt": {"path":["/home/chirag/datasets/subset2/voc_5796910.wav"], "seconds_start": 32, "seconds_total": 185},
+                    "prompt": {"path":["/home/chirag/datasets/subset4/voc_236327.wav"], "seconds_start": 32, "seconds_total": 235},
                     "seconds_start": 32,
                     "seconds_total": 185
                 },
                 {
-                    "prompt": {"path":["/home/chirag/datasets/subset2/voc_940445.wav"], "seconds_start": 32, "seconds_total": 281},
+                    "prompt": {"path":["/home/chirag/datasets/subset4/voc_29851.wav"], "seconds_start": 32, "seconds_total": 205},
                     "seconds_start": 32,
                     "seconds_total": 281
                 }

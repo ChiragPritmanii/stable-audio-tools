@@ -577,7 +577,7 @@ class BestRQConditioner(Conditioner):
         return wav
 
     def forward(self, prompts: tp.List[dict], device: tp.Union[torch.device, str]) -> tp.Tuple[torch.Tensor, torch.Tensor]:
-        self.proj_out.to(device) # 1536 -> 768
+        self.proj_out.to(device) # 1536 -> 1536
         
         # sample propmts input:
         # Note: path value is in a list, seconds_start and seconds_total values are put in a tensor, so there's some internal processing taking place, from custom_metadata output ot conditioning input
@@ -640,7 +640,7 @@ class BestRQConditioner(Conditioner):
 
         # unsqueeze attention_mask to for b, t, 1 for broadcasting
         embeddings = embeddings * attention_mask.unsqueeze(-1).float()
-        
+
         return embeddings, attention_mask
 
 class PretransformConditioner(Conditioner):
