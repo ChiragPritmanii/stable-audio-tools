@@ -70,7 +70,7 @@ def create_training_wrapper_from_config(model_config, model):
             use_ema = training_config.get("use_ema", True),
             log_loss_info=training_config.get("log_loss_info", False),
             optimizer_configs=training_config.get("optimizer_configs", None),
-            use_reconstruction_loss=training_config.get("use_reconstruction_loss", True), # this trains the vae too
+            use_reconstruction_loss=training_config.get("use_reconstruction_loss", False), # this trains the vae too
             # use_reconstruction_loss=training_config.get("use_reconstruction_loss", False),
         )
     elif model_type == 'diffusion_prior':
