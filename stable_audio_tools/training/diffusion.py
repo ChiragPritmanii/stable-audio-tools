@@ -547,8 +547,8 @@ class DiffusionCondDemoCallback(pl.Callback):
 
         noise = torch.randn([self.num_demos, module.diffusion.io_channels, demo_samples]).to(module.device)
 
-        subset_dir = "/home/chirag/datasets/subset3"
-        random_samples = True
+        subset_dir = "/home/chirag/datasets/subset2"
+        random_samples = False
         
         try:
             print("Getting conditioning")
@@ -560,7 +560,7 @@ class DiffusionCondDemoCallback(pl.Callback):
             if random_samples:
                 assert subset_dir!=None
                 subset_files = glob(subset_dir+"/*wav")
-                random_files = random.choices(subset_files, k=4)
+                random_files = random.sample(subset_files, k=4) # without replacement
                 files_seconds_total = [str(int(float(mediainfo(f)['duration']))) for f in random_files]
                 files_seconds_start = [str(32)]*4
                 demo_data = list(zip(random_files, files_seconds_start, files_seconds_total))
