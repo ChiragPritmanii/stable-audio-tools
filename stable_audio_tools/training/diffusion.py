@@ -185,7 +185,7 @@ class DiffusionUncondDemoCallback(pl.Callback):
             fakes = rearrange(fakes, 'b d n -> d (b n)')
 
             log_dict = {}
-            
+
             filename = f'demo_{trainer.global_step:08}.wav'
             fakes = fakes.to(torch.float32).div(torch.max(torch.abs(fakes))).mul(32767).to(torch.int16).cpu()
             torchaudio.save(filename, fakes, self.sample_rate)
@@ -525,13 +525,14 @@ class DiffusionCondDemoCallback(pl.Callback):
         demo_samples = self.demo_samples
 
         demo_cond = self.demo_conditioning
+        print(demo_cond, demo_samples)
 
         if self.demo_cond_from_batch:
             # Get metadata from the batch
             demo_cond = batch[1][:self.num_demos]
 
         if module.diffusion.pretransform is not None:
-            demo_samples = demo_samples // module.diffusion.pretransform.downsampling_ratio
+            demo_samples = demo_samples // module.diffusion.pretransform.downsampling_ratio #downsampled sample size 
 
         noise = torch.randn([self.num_demos, module.diffusion.io_channels, demo_samples]).to(module.device)
 
@@ -541,14 +542,30 @@ class DiffusionCondDemoCallback(pl.Callback):
                 conditioning = module.diffusion.conditioner(demo_cond, module.device)
 
             cond_inputs = module.diffusion.get_conditioning_inputs(conditioning)
-
             log_dict = {}
+            demo_data = [[demo_cond[0]['prompt']["path"][0], str(demo_cond[0]['seconds_start']), str(demo_cond[0]['seconds_total'])],
+                         [demo_cond[1]['prompt']["path"][0], str(demo_cond[1]['seconds_start']), str(demo_cond[1]['seconds_total'])],
+                         [demo_cond[2]['prompt']["path"][0], str(demo_cond[2]['seconds_start']), str(demo_cond[2]['seconds_total'])],
+                         [demo_cond[3]['prompt']["path"][0], str(demo_cond[3]['seconds_start']), str(demo_cond[3]['seconds_total'])]]
+                        #  [demo_cond[4]['prompt']["path"][0], str(demo_cond[4]['seconds_start']), str(demo_cond[4]['seconds_total'])],
+                        #  [demo_cond[5]['prompt']["path"][0], str(demo_cond[5]['seconds_start']), str(demo_cond[5]['seconds_total'])]]
+            
+            log_dict['demo_inputs'] = wandb.Table(columns=['prompt', 'seconds_start', 'seconds_total'], data = demo_data)
+
+            wavs = []
+            for path, start, _ in demo_data:
+                wav, sr = torchaudio.load(path)
+                wav = (wav[:, int(start)*sr:(int(start)+32)*sr]).unsqueeze(0)
+                wavs.append(wav)
+
+            tmp_dir = "/home/chirag/models/diffusion/runs/outputs/"
 
             if self.display_audio_cond:
-                audio_inputs = torch.cat([cond["audio"] for cond in demo_cond], dim=0)
+                # audio_inputs = torch.cat([cond["audio"] for cond in demo_cond], dim=0)
+                audio_inputs = torch.cat(wavs, dim=0) # batch, channels, timesteps
                 audio_inputs = rearrange(audio_inputs, 'b d n -> d (b n)')
 
-                filename = f'demo_audio_cond_{trainer.global_step:08}.wav'
+                filename = f'{tmp_dir}demo_audio_cond_{trainer.global_step:08}.wav'
                 audio_inputs = audio_inputs.to(torch.float32).mul(32767).to(torch.int16).cpu()
                 torchaudio.save(filename, audio_inputs, self.sample_rate)
                 log_dict[f'demo_audio_cond'] = wandb.Audio(filename, sample_rate=self.sample_rate, caption="Audio conditioning")
@@ -561,17 +578,19 @@ class DiffusionCondDemoCallback(pl.Callback):
                 
                 with torch.cuda.amp.autocast():
                     model = module.diffusion_ema.model if module.diffusion_ema is not None else module.diffusion.model
+                    
+                    # fakes = sample(model, noise, self.demo_steps, 0, **cond_inputs, cfg_scale=cfg_scale, batch_cfg=True)
+                    fakes = sample(model, noise, self.demo_steps, 1, **cond_inputs, cfg_scale=cfg_scale, batch_cfg=True)
 
-                    fakes = sample(model, noise, self.demo_steps, 0, **cond_inputs, cfg_scale=cfg_scale, batch_cfg=True)
                     if module.diffusion.pretransform is not None:
                         fakes = module.diffusion.pretransform.decode(fakes)
 
                 # Put the demos together
                 fakes = rearrange(fakes, 'b d n -> d (b n)')
 
-                log_dict = {}
+                # log_dict = {}
                 
-                filename = f'demo_cfg_{cfg_scale}_{trainer.global_step:08}.wav'
+                filename = f'{tmp_dir}demo_cfg_{cfg_scale}_{trainer.global_step:08}.wav'
                 fakes = fakes.to(torch.float32).div(torch.max(torch.abs(fakes))).mul(32767).to(torch.int16).cpu()
                 torchaudio.save(filename, fakes, self.sample_rate)
 
