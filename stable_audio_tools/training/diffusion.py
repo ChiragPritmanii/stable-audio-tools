@@ -545,7 +545,7 @@ class DiffusionCondDemoCallback(pl.Callback):
 
         noise = torch.randn([self.num_demos, module.diffusion.io_channels, demo_samples]).to(module.device)
 
-        subset_dir = None
+        subset_dir = "/home/chirag/datasets/subset3"
         random_samples = True
         
         try:
