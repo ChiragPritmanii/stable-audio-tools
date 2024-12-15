@@ -412,8 +412,10 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
             # No dropout: The model uses the full conditioning information provided in cross_attn_cond and prepend_cond.
             # No CFG blending: The model's output is purely based on the conditioned representation (cond_output), with no contribution from the unconditioned representation (uncond_output).
             # The overall behavior is as if the model is not using CFG at all.
-            v = self.diffusion(noised_inputs, t, cond=conditioning, cfg_dropout_prob = 0., cfg_scale=1.0, **extra_args)
-            # v = self.diffusion(noised_inputs, t, cond=conditioning, cfg_dropout_prob = 0.1, **extra_args)
+            # v = self.diffusion(noised_inputs, t, cond=conditioning, cfg_dropout_prob = 0.0, **extra_args)
+            
+            # mild dropout for robustness in reconstructions
+            v = self.diffusion(noised_inputs, t, cond=conditioning, cfg_dropout_prob = 0.1, **extra_args)
             p.tick("diffusion")
 
             loss_info.update({
@@ -551,7 +553,7 @@ class DiffusionCondDemoCallback(pl.Callback):
         try:
             print("Getting conditioning")
             with torch.cuda.amp.autocast():
-                conditioning = module.diffusion.conditioner(demo_cond, module.device)
+                conditioning = module.diffusion.conditioner(demo_cond, module.device) # {id: cond_input}
 
             cond_inputs = module.diffusion.get_conditioning_inputs(conditioning)
             log_dict = {}
@@ -596,10 +598,9 @@ class DiffusionCondDemoCallback(pl.Callback):
                 
                 with torch.cuda.amp.autocast():
                     model = module.diffusion_ema.model if module.diffusion_ema is not None else module.diffusion.model
-                    
-                    fakes = sample(model, noise, self.demo_steps, 0, **cond_inputs, cfg_scale=cfg_scale, batch_cfg=True)
-                    # fakes = sample(model, noise, self.demo_steps, 1, **cond_inputs, cfg_scale=cfg_scale, batch_cfg=True)
-
+                    fakes = sample(model, noise, self.demo_steps, 1, **cond_inputs, cfg_scale=cfg_scale, batch_cfg=True)
+                    # original setting: 
+                    # fakes = sample(model, noise, self.demo_steps, 0, **cond_inputs, cfg_scale=cfg_scale, batch_cfg=True)
                     if module.diffusion.pretransform is not None:
                         fakes = module.diffusion.pretransform.decode(fakes)
 

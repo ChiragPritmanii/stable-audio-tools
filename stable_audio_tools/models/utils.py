@@ -1,3 +1,4 @@
+import math
 import torch
 from safetensors.torch import load_file
 
@@ -81,3 +82,28 @@ def sample_top_p(probs: torch.Tensor, p: float) -> torch.Tensor:
     next_token = multinomial(probs_sort, num_samples=1)
     next_token = torch.gather(probs_idx, -1, next_token)
     return next_token
+
+class PositionalEncoding:
+    def __init__(self, seq_length=2378, embedding_dim=512):
+        self.seq_length = seq_length
+        self.embedding_dim = embedding_dim
+
+        # Initialize positional embeddings
+        position = torch.arange(seq_length).unsqueeze(1)
+        div_term = torch.exp(
+            torch.arange(0, embedding_dim, 2) * - (math.log(10000.0) / embedding_dim)
+        )
+        pe = torch.zeros(seq_length, embedding_dim)
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+
+        # Add a 'batch' dimension with 'unsqueeze'
+        self.pe = pe.unsqueeze(0)
+
+    def __call__(self, x):
+        """
+        Args:
+            x: Tensor, shape [batch_size, seq_length, embedding_dim]
+        """
+        # return positional embeddings
+        return self.pe[:, : x.size(1)]

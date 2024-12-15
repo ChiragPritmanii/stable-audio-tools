@@ -73,7 +73,8 @@
                         "output_dim": 1536,
                         "max_length": 2378,
                         "project_out": true,
-                        "use_positional_embedding": true
+                        "use_positional_embedding": true,
+                        "pos_emb_dim": 512
                     }
                 },
                 {
@@ -168,7 +169,7 @@
                 }
             ],
             "demo_cfg_scales": [
-                1
+                2, 3, 12
             ]
         }
     }

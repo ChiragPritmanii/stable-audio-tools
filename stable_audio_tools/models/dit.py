@@ -7,8 +7,10 @@ from torch import nn
 from torch.nn import functional as F
 from x_transformers import ContinuousTransformerWrapper, Encoder
 
+from .utils import PositionalEncoding
 from .blocks import FourierFeatures
-from .transformer import ContinuousTransformer        
+from .transformer import ContinuousTransformer
+
 
 class DiffusionTransformer(nn.Module):
     def __init__(self, 
@@ -22,6 +24,8 @@ class DiffusionTransformer(nn.Module):
         prepend_cond_dim=0,
         depth=12,
         num_heads=8,
+        max_length = 2378,
+        pos_emb_dim = 512,
         transformer_type: tp.Literal["x-transformers", "continuous_transformer"] = "x-transformers",
         global_cond_type: tp.Literal["prepend", "adaLN"] = "prepend",
         **kwargs):
@@ -40,6 +44,10 @@ class DiffusionTransformer(nn.Module):
             nn.SiLU(),
             nn.Linear(embed_dim, embed_dim, bias=True),
         )
+
+        self.max_length = max_length
+        self.pos_emb_dim = pos_emb_dim
+        self.pos_embed = PositionalEncoding(seq_length=self.max_length, embedding_dim=self.pos_emb_dim)
 
         if cond_token_dim > 0:
             # Conditioning tokens
@@ -248,7 +256,15 @@ class DiffusionTransformer(nn.Module):
         # CFG dropout
         if cfg_dropout_prob > 0.0:
             if cross_attn_cond is not None:
-                null_embed = torch.zeros_like(cross_attn_cond, device=cross_attn_cond.device)
+                # original logic:
+                # null_embed = torch.zeros_like(cross_attn_cond, device=cross_attn_cond.device)
+                
+                null_embed = torch.zeros(cross_attn_cond.shape[0], cross_attn_cond.shape[1], (cross_attn_cond.shape[2] - self.pos_emb_dim), device=cross_attn_cond.device)
+                pe = self.pos_embed(null_embed).to(cross_attn_cond.device)
+                null_embed = torch.cat(
+                    [null_embed, pe.repeat(null_embed.shape[0], 1, 1)],
+                    dim=-1,
+                )
                 dropout_mask = torch.bernoulli(torch.full((cross_attn_cond.shape[0], 1, 1), cfg_dropout_prob, device=cross_attn_cond.device)).to(torch.bool)
                 cross_attn_cond = torch.where(dropout_mask, null_embed, cross_attn_cond)
 
@@ -280,7 +296,14 @@ class DiffusionTransformer(nn.Module):
             # Handle CFG for cross-attention conditioning
             if cross_attn_cond is not None:
 
-                null_embed = torch.zeros_like(cross_attn_cond, device=cross_attn_cond.device)
+                null_embed = torch.zeros(cross_attn_cond.shape[0], cross_attn_cond.shape[1], (cross_attn_cond.shape[2] - self.pos_emb_dim), device=cross_attn_cond.device)
+                pe = self.pos_embed(null_embed).to(cross_attn_cond.device)
+                null_embed = torch.cat(
+                    [null_embed, pe.repeat(null_embed.shape[0], 1, 1)],
+                    dim=-1,
+                )
+                # original code:
+                # null_embed = torch.zeros_like(cross_attn_cond, device=cross_attn_cond.device)
 
                 # For negative cross-attention conditioning, replace the null embed with the negative cross-attention conditioning
                 if negative_cross_attn_cond is not None:
@@ -294,6 +317,7 @@ class DiffusionTransformer(nn.Module):
                     batch_cond = torch.cat([cross_attn_cond, negative_cross_attn_cond], dim=0)
 
                 else:
+                    # use both cond and uncond when cfg_scale>1.0
                     batch_cond = torch.cat([cross_attn_cond, null_embed], dim=0)
 
                 if cross_attn_cond_mask is not None:
