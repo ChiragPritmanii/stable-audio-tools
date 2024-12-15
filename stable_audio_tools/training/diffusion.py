@@ -576,7 +576,7 @@ class DiffusionCondDemoCallback(pl.Callback):
                 wav = (wav[:, int(start)*sr:(int(start)+32)*sr]).unsqueeze(0)
                 wavs.append(wav)
 
-            tmp_dir = "/home/chirag/models/diffusion/runs/outputs/1/"
+            tmp_dir = "/home/chirag/models/diffusion/runs/outputs/8/"
 
             if self.display_audio_cond:
                 # audio_inputs = torch.cat([cond["audio"] for cond in demo_cond], dim=0)
