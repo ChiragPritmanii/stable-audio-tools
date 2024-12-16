@@ -49,7 +49,7 @@ class PadCrop_Normalized_T(nn.Module):
         n_channels, n_samples = source.shape
 
         # If randomize is False, always start at the beginning of the audio
-        offset = 32*self.sample_rate
+        offset = 32 * self.sample_rate
 
         # Calculate the start and end times of the chunk
         t_start = offset / (n_samples)
