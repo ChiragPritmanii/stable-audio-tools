@@ -370,13 +370,17 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
 
         with torch.cuda.amp.autocast():
             conditioning = self.diffusion.conditioner(metadata, self.device)
+        
+        print("conditioning",conditioning)
             
         # If mask_padding is on, randomly drop the padding masks to allow for learning silence padding
         use_padding_mask = self.mask_padding and random.random() > self.mask_padding_dropout
+        print("use_padding_mask",use_padding_mask)
 
         # Create batch tensor of attention masks from the "mask" field of the metadata array
         if use_padding_mask:
             padding_masks = torch.stack([md["padding_mask"][0] for md in metadata], dim=0).to(self.device) # Shape (batch_size, sequence_length)
+            print("padding_masks.shape, padding_masks", padding_masks.shape, padding_masks)
 
         p.tick("conditioning")
 
@@ -385,12 +389,13 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
 
             with torch.cuda.amp.autocast() and torch.set_grad_enabled(self.diffusion.pretransform.enable_grad):
                 diffusion_input = self.diffusion.pretransform.encode(diffusion_input)
+                print("diffusion_input.shape",diffusion_input.shape)
                 p.tick("pretransform")
 
                 # If mask_padding is on, interpolate the padding masks to the size of the pretransformed input
                 if use_padding_mask:
                     padding_masks = F.interpolate(padding_masks.unsqueeze(1).float(), size=diffusion_input.shape[2], mode="nearest").squeeze(1).bool()
-
+                    print("padding_masks, padding_masks.shape", padding_masks, padding_masks.shape)
 
         # Combine the ground truth data and the noise
         alphas = alphas[:, None, None]
@@ -424,6 +429,11 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
             p.tick("diffusion")
 
             loss_info.update({
+                "v": v,
+                "targets": targets,
+                "padding_mask": padding_masks if use_padding_mask else None,
+            })
+            print({
                 "v": v,
                 "targets": targets,
                 "padding_mask": padding_masks if use_padding_mask else None,
