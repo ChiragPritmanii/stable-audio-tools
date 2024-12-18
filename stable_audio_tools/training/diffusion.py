@@ -340,26 +340,26 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         reals, metadata = batch
-        print("reals.shape, metadata", reals.shape, metadata)
+        # print("reals.shape, metadata", reals.shape, metadata)
 
         p = Profiler()
 
         if reals.ndim == 4 and reals.shape[0] == 1:
             reals = reals[0]
-            print("reals.shape",reals.shape)
+            # print("reals.shape",reals.shape)
 
         loss_info = {}
 
         # Draw uniformly distributed continuous timesteps
         t = self.rng.draw(reals.shape[0])[:, 0].to(self.device)
-        print("t",t)
+        # print("t",t)
 
         # Replace 1% of t with ones to ensure training on terminal SNR
         t = torch.where(torch.rand_like(t) < 0.01, torch.ones_like(t), t)
-        print("t",t)
+        # print("t",t)
 
         # Calculate the noise schedule parameters for those timesteps
-        alphas, sigmas = get_alphas_sigmas(t)
+        # alphas, sigmas = get_alphas_sigmas(t)
         print("alphas, sigmas",  alphas, sigmas)
 
         diffusion_input = reals
@@ -371,25 +371,25 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
         with torch.cuda.amp.autocast():
             conditioning = self.diffusion.conditioner(metadata, self.device)
         
-        print("""conditioning['prompt'][0].shape, 
-              conditioning['prompt'][1].shape, 
-              (conditioning['prompt'][1]==True).sum(), 
-              conditioning['seconds_start'][0].shape, 
-              conditioning['seconds_total'][0].shape""",
-              conditioning['prompt'][0].shape, 
-              conditioning['prompt'][1].shape, 
-              (conditioning['prompt'][1]==True).sum(), 
-              conditioning['seconds_start'][0].shape, 
-              conditioning['seconds_total'][0].shape)
+        # print("""conditioning['prompt'][0].shape, 
+        #       conditioning['prompt'][1].shape, 
+        #       (conditioning['prompt'][1]==True).sum(), 
+        #       conditioning['seconds_start'][0].shape, 
+        #       conditioning['seconds_total'][0].shape""",
+        #       conditioning['prompt'][0].shape, 
+        #       conditioning['prompt'][1].shape, 
+        #       (conditioning['prompt'][1]==True).sum(), 
+        #       conditioning['seconds_start'][0].shape, 
+        #       conditioning['seconds_total'][0].shape)
             
         # If mask_padding is on, randomly drop the padding masks to allow for learning silence padding
         use_padding_mask = self.mask_padding and random.random() > self.mask_padding_dropout
-        print("use_padding_mask",use_padding_mask)
+        # print("use_padding_mask",use_padding_mask)
 
         # Create batch tensor of attention masks from the "mask" field of the metadata array
         if use_padding_mask:
             padding_masks = torch.stack([md["padding_mask"][0] for md in metadata], dim=0).to(self.device) # Shape (batch_size, sequence_length)
-            print("padding_masks.shape, padding_masks", padding_masks.shape, padding_masks)
+            # print("padding_masks.shape, padding_masks", padding_masks.shape, padding_masks)
 
         p.tick("conditioning")
 
@@ -398,13 +398,13 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
 
             with torch.cuda.amp.autocast() and torch.set_grad_enabled(self.diffusion.pretransform.enable_grad):
                 diffusion_input = self.diffusion.pretransform.encode(diffusion_input)
-                print("diffusion_input.shape",diffusion_input.shape)
+                # print("diffusion_input.shape",diffusion_input.shape)
                 p.tick("pretransform")
 
                 # If mask_padding is on, interpolate the padding masks to the size of the pretransformed input
                 if use_padding_mask:
                     padding_masks = F.interpolate(padding_masks.unsqueeze(1).float(), size=diffusion_input.shape[2], mode="nearest").squeeze(1).bool()
-                    print("padding_masks, padding_masks.shape", padding_masks, padding_masks.shape)
+                    # print("padding_masks, padding_masks.shape", padding_masks, padding_masks.shape)
 
         # Combine the ground truth data and the noise
         alphas = alphas[:, None, None]
@@ -442,11 +442,11 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
                 "targets": targets,
                 "padding_mask": padding_masks if use_padding_mask else None,
             })
-            print({
-                "v": v,
-                "targets": targets,
-                "padding_mask": padding_masks if use_padding_mask else None,
-            })
+            # print({
+            #     "v": v,
+            #     "targets": targets,
+            #     "padding_mask": padding_masks if use_padding_mask else None,
+            # })
 
             if self.use_reconstruction_loss:
                 pred = noised_inputs * alphas - v * sigmas
@@ -560,7 +560,7 @@ class DiffusionCondDemoCallback(pl.Callback):
         demo_samples = self.demo_samples
 
         demo_cond = self.demo_conditioning
-        print(demo_cond, demo_samples)
+        # print(demo_cond, demo_samples)
 
         if self.demo_cond_from_batch:
             # Get metadata from the batch
