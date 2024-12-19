@@ -548,6 +548,7 @@ class BestRQConditioner(Conditioner):
         use_positional_embedding: bool = True,
         device: str = "cuda",
     ):
+        # try putting project_out to True, so the embeddings are processed once
         super().__init__(dim=output_dim, output_dim=output_dim, project_out=project_out)
         
         self.output_dim = output_dim

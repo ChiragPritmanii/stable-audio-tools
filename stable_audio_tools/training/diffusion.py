@@ -354,12 +354,13 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
         t = self.rng.draw(reals.shape[0])[:, 0].to(self.device)
         # print("t",t)
 
-        # Replace 1% of t with ones to ensure training on terminal SNR
-        t = torch.where(torch.rand_like(t) < 0.01, torch.ones_like(t), t)
+        # Replace 15% of t with ones to ensure training on terminal SNR
+        t = torch.where(torch.rand_like(t) < 0.15, torch.ones_like(t), t)
         # print("t",t)
 
         # Calculate the noise schedule parameters for those timesteps
         alphas, sigmas = get_alphas_sigmas(t)
+        alphas, sigmas = torch.clip(alphas, min=0, max=1), torch.clip(alphas, min=0, max=1)
         # print("alphas, sigmas",  alphas, sigmas)
 
         diffusion_input = reals

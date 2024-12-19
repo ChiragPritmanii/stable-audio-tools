@@ -42,7 +42,7 @@ def sample(model, x, steps, eta, **extra_args):
         eps = x * sigmas[i] + v * alphas[i]
 
         # If we are not on the last timestep, compute the noisy image for the
-        # next timestep.
+        # next timestep. (read this twice, important note)
         if i < steps - 1:
             # If eta > 0, adjust the scaling factor for the predicted noise
             # downward according to the amount of additional noise to add

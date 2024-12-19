@@ -259,6 +259,7 @@ class DiffusionTransformer(nn.Module):
                 # original logic:
                 # null_embed = torch.zeros_like(cross_attn_cond, device=cross_attn_cond.device)
                 
+                # add positional encodings to the null embedding (unconditional)
                 null_embed = torch.zeros(cross_attn_cond.shape[0], cross_attn_cond.shape[1], (cross_attn_cond.shape[2] - self.pos_emb_dim), device=cross_attn_cond.device)
                 pe = self.pos_embed(null_embed).to(cross_attn_cond.device)
                 null_embed = torch.cat(
