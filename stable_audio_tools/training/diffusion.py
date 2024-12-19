@@ -371,11 +371,15 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
         loss_info = {}
 
         # Draw uniformly distributed continuous timesteps
-        t = self.rng.draw(reals.shape[0])[:, 0].to(self.device)
+        # t = self.rng.draw(reals.shape[0])[:, 0].to(self.device)
 
-        # Replace 1% of t with ones to ensure training on terminal SNR
-        t = torch.where(torch.rand_like(t) < 0.01, torch.ones_like(t), t)
+        # may need to set the low to 1, because at t=0 there is no noise removal needed
+        t = torch.randint(low=0, high=1000, size=(reals.shape[0],), dtype=torch.int64, device=None, requires_grad=False)
 
+        # Replace 15% of t with last timestep to ensure training on terminal SNR
+        t = torch.where(torch.rand_like(t, dtype=torch.float) < 0.15, torch.ones_like(t)*1000, t)
+
+        
         # Calculate the noise schedule parameters for those timesteps
         alphas, sigmas = get_alphas_sigmas(t)
 
