@@ -27,6 +27,8 @@ from .utils import create_optimizer_from_config, create_scheduler_from_config
 
 from time import time
 
+torch.manual_seed(128)
+
 class Profiler:
 
     def __init__(self):
