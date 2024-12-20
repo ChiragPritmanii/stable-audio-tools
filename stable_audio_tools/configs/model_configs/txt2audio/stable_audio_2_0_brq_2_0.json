@@ -142,7 +142,7 @@
             }
         },
         "demo": {
-            "demo_every": 250,
+            "demo_every": 100,
             "demo_steps": 200,
             "num_demos": 4,
             "display_audio_cond": true,
