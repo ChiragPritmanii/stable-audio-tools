@@ -544,7 +544,7 @@ class BestRQConditioner(Conditioner):
         output_dim: int = 1536, # we remove seconds_total and seconds_start from the cross-attn so we can directly send 1536 cond_dim i.e equal to embed_dim
         max_length: int = 2378, # actual duration is 47.55, i.e. 47.55 * 50 = 2378 tokens corresponding to the duration
         pos_emb_dim: int = 512, # the token embedding from best-rq are 1024, we concat 512 dimensional pos_emb i.e. 1536 cond_dim
-        project_out: bool = False, # no need to project out as the embeddings are already of 1536 dimension
+        project_out: bool = True, #trials with setting True ; # no need to project out as the embeddings are already of 1536 dimension
         use_positional_embedding: bool = True,
         device: str = "cuda",
     ):
@@ -615,7 +615,7 @@ class BestRQConditioner(Conditioner):
                     self.max_length - LATENT_SAMPLES, # (2378 - 1600)
                     embeddings.shape[2],
                 ).to(embeddings.device)
-                * -1,
+                * 0,
             ],
             dim=1,
         )  # b, t'', e (t'' = 2378)
@@ -785,7 +785,7 @@ def create_multi_conditioner_from_conditioning_config(
                                                  vq_ckpt="/home/chirag/models/tokenizer/centroids.npy", 
                                                  max_length=2378, 
                                                  output_dim=1536,
-                                                 project_out = False,
+                                                 project_out = True,
                                                  use_positional_embedding = True,
                                                  device = "cuda")
         elif conditioner_type == "pretransform":
