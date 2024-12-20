@@ -148,22 +148,22 @@
             "display_audio_cond": true,
             "demo_cond": [
                 {
-                    "prompt": {"path":["/home/chirag/datasets/subset4/voc_692994.wav"], "seconds_start": 32, "seconds_total": 336},
+                    "prompt": {"path":["/home/chirag/datasets/subset5/ins_1192983.wav"], "seconds_start": 32, "seconds_total": 219},
                     "seconds_start": 32,
                     "seconds_total": 274
                 },
                 {
-                    "prompt": {"path":["/home/chirag/datasets/subset4/voc_859104.wav"], "seconds_start": 32, "seconds_total": 137},
+                    "prompt": {"path":["/home/chirag/datasets/subset5/ins_59657.wav"], "seconds_start": 32, "seconds_total": 148},
                     "seconds_start": 32,
                     "seconds_total": 230
                 },
                 {
-                    "prompt": {"path":["/home/chirag/datasets/subset4/voc_236327.wav"], "seconds_start": 32, "seconds_total": 235},
+                    "prompt": {"path":["/home/chirag/datasets/subset5/ins_887984.wav"], "seconds_start": 32, "seconds_total": 223},
                     "seconds_start": 32,
                     "seconds_total": 185
                 },
                 {
-                    "prompt": {"path":["/home/chirag/datasets/subset4/voc_29851.wav"], "seconds_start": 32, "seconds_total": 205},
+                    "prompt": {"path":["/home/chirag/datasets/subset5/ins_4342937.wav"], "seconds_start": 32, "seconds_total": 193},
                     "seconds_start": 32,
                     "seconds_total": 281
                 }
