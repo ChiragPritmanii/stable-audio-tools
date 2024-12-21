@@ -245,7 +245,7 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
         self.mask_padding = mask_padding
         self.mask_padding_dropout = mask_padding_dropout
 
-        print("self.mask_padding.shape", self.mask_padding.shape)
+        print("self.mask_padding, self.mask_padding_dropout ", self.mask_padding, self.mask_padding_dropout )
 
 
         self.rng = torch.quasirandom.SobolEngine(1, scramble=True)
