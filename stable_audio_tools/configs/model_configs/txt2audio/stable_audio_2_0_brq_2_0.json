@@ -168,7 +168,7 @@
                     "seconds_total": 281
                 }
             ],
-            "demo_cfg_scales": [1, 2]
+            "demo_cfg_scales": [1, 2, 6]
         }
     }
 }
