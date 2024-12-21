@@ -394,7 +394,7 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
         # Create batch tensor of attention masks from the "mask" field of the metadata array
         if use_padding_mask:
             padding_masks = torch.stack([md["padding_mask"][0] for md in metadata], dim=0).to(self.device) # Shape (batch_size, sequence_length)
-            # print("padding_masks.shape, padding_masks", padding_masks.shape, padding_masks)
+            print("padding_masks.shape, padding_masks", padding_masks.shape, padding_masks)
 
         p.tick("conditioning")
 
@@ -410,8 +410,7 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
                 if use_padding_mask:
                     padding_masks = F.interpolate(padding_masks.unsqueeze(1).float(), size=diffusion_input.shape[2], mode="nearest").squeeze(1).bool()
                     # print("padding_masks, padding_masks.shape", padding_masks, padding_masks.shape)
-
-                print("padding_masks.shape", padding_masks.shape)
+                    print("padding_masks.shape", padding_masks.shape)
 
         # Combine the ground truth data and the noise
         alphas = alphas[:, None, None]
