@@ -364,7 +364,7 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
 
         # Calculate the noise schedule parameters for those timesteps
         alphas, sigmas = get_alphas_sigmas(t)
-        alphas, sigmas = torch.clip(alphas, min=0, max=1), torch.clip(alphas, min=0, max=1)
+        # alphas, sigmas = torch.clip(alphas, min=0, max=1), torch.clip(alphas, min=0, max=1)
         # print("alphas, sigmas",  alphas, sigmas)
 
         diffusion_input = reals

@@ -30,7 +30,7 @@ def sample(model, x, steps, eta, **extra_args):
 
     alphas, sigmas = get_alphas_sigmas(t)
     # forgot to add this in sampling, (sampling from last timestep)
-    alphas, sigmas = torch.clip(alphas, min=0, max=1), torch.clip(alphas, min=0, max=1)
+    # alphas, sigmas = torch.clip(alphas, min=0, max=1), torch.clip(alphas, min=0, max=1)
 
     # The sampling loop
     for i in trange(steps):
