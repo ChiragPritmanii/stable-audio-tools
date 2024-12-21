@@ -245,6 +245,8 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
         self.mask_padding = mask_padding
         self.mask_padding_dropout = mask_padding_dropout
 
+        print("self.mask_padding.shape", self.mask_padding.shape)
+
 
         self.rng = torch.quasirandom.SobolEngine(1, scramble=True)
 
@@ -408,6 +410,8 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
                 if use_padding_mask:
                     padding_masks = F.interpolate(padding_masks.unsqueeze(1).float(), size=diffusion_input.shape[2], mode="nearest").squeeze(1).bool()
                     # print("padding_masks, padding_masks.shape", padding_masks, padding_masks.shape)
+
+                print("padding_masks.shape", padding_masks.shape)
 
         # Combine the ground truth data and the noise
         alphas = alphas[:, None, None]

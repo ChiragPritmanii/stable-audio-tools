@@ -65,8 +65,10 @@ def create_training_wrapper_from_config(model_config, model):
             model, 
             lr=training_config.get("learning_rate", None),
             causal_dropout=training_config.get("causal_dropout", 0.0),
-            mask_padding=training_config.get("mask_padding", False),
-            mask_padding_dropout=training_config.get("mask_padding_dropout", 0.0),
+            mask_padding=training_config.get("mask_padding", True), # trials
+             mask_padding_dropout=training_config.get("mask_padding_dropout", 0.1),
+            # mask_padding=training_config.get("mask_padding", False),
+            # mask_padding_dropout=training_config.get("mask_padding_dropout", 0.0),
             use_ema = training_config.get("use_ema", True),
             log_loss_info=training_config.get("log_loss_info", False),
             optimizer_configs=training_config.get("optimizer_configs", None),
