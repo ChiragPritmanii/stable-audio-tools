@@ -142,30 +142,30 @@
             }
         },
         "demo": {
-            "demo_every": 100,
+            "demo_every": 50,
             "demo_steps": 50,
             "num_demos": 4,
             "display_audio_cond": true,
             "demo_cond": [
                 {
-                    "prompt": {"path":["/home/chirag/datasets/subset5/ins_1192983.wav"], "seconds_start": 32, "seconds_total": 219},
+                    "prompt": {"path":["/home/chirag/datasets/subset6/fma_035379.wav"], "seconds_start": 32, "seconds_total": 156},
                     "seconds_start": 32,
-                    "seconds_total": 274
+                    "seconds_total": 156
                 },
                 {
-                    "prompt": {"path":["/home/chirag/datasets/subset5/ins_59657.wav"], "seconds_start": 32, "seconds_total": 148},
+                    "prompt": {"path":["/home/chirag/datasets/subset6/fma_036366.wav"], "seconds_start": 32, "seconds_total": 407},
                     "seconds_start": 32,
-                    "seconds_total": 230
+                    "seconds_total": 407
                 },
                 {
-                    "prompt": {"path":["/home/chirag/datasets/subset5/ins_887984.wav"], "seconds_start": 32, "seconds_total": 223},
-                    "seconds_start": 32,
-                    "seconds_total": 185
-                },
-                {
-                    "prompt": {"path":["/home/chirag/datasets/subset5/ins_4342937.wav"], "seconds_start": 32, "seconds_total": 193},
+                    "prompt": {"path":["/home/chirag/datasets/subset6/fma_005085.wav"], "seconds_start": 32, "seconds_total": 281},
                     "seconds_start": 32,
                     "seconds_total": 281
+                },
+                {
+                    "prompt": {"path":["/home/chirag/datasets/subset6/fma_052703.wav"], "seconds_start": 32, "seconds_total": 181},
+                    "seconds_start": 32,
+                    "seconds_total": 181
                 }
             ],
             "demo_cfg_scales": [1, 2, 6]

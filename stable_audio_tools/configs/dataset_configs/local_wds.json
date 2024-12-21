@@ -3,10 +3,10 @@
     "datasets": [
         {
             "id": "local-test",
-            "local_path": "/home/chirag/datasets/subset5.tar",
+            "local_path": "/home/chirag/datasets/subset6.tar",
             "custom_metadata_module":"/home/chirag/audio_diffusion/stable-audio-tools/stable_audio_tools/configs/dataset_configs/custom_metadata/custom_md_example.py"
         }
     ],
-    "epoch_steps": 20,
+    "epoch_steps": 1,
     "random_crop": true
 }
