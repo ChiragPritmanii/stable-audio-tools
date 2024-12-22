@@ -4,6 +4,19 @@ from tqdm import trange
 
 import k_diffusion as K
 
+def get_snr(alphas, sigmas, clamp_min=True, clamp_min_value=1e-3):
+    """Returns the signal-to-noise ratio for a given number of steps."""
+    snr = (alphas**2) / (sigmas**2)
+    if clamp_min:
+        snr = torch.clamp_min(snr, 1e-3)
+    return snr
+
+def snr_to_weight(snr, gamma=5):
+    """Returns the weight for a given signal-to-noise ratio."""
+    min_snr_gamma = torch.minimum(snr, torch.full_like(snr, gamma))
+    loss_weight = torch.divide(min_snr_gamma, snr + 1)
+    return loss_weight
+
 # Define the noise schedule and sampling loop
 def get_alphas_sigmas(t):
     """Returns the scaling factors for the clean image (alpha) and for the

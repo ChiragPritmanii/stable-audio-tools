@@ -42,16 +42,17 @@ class L1Loss(LossModule):
         return self.weight * mse_loss
     
 class MSELoss(LossModule):
-    def __init__(self, key_a: str, key_b: str, weight: float = 1.0, mask_key: str = None, name: str = 'mse_loss'):
+    def __init__(self, key_a: str, key_b: str, key_c: float, weight: float = 1.0, mask_key: str = None, name: str = 'mse_loss'):
         super().__init__(name=name, weight=weight)
 
         self.key_a = key_a
         self.key_b = key_b
+        self.key_c = key_c
 
         self.mask_key = mask_key
     
     def forward(self, info):
-        mse_loss = F.mse_loss(info[self.key_a], info[self.key_b], reduction='none')    
+        mse_loss = F.mse_loss(info[self.key_a], info[self.key_b], reduction='none') 
 
         if self.mask_key is not None and self.mask_key in info and info[self.mask_key] is not None:
             mask = info[self.mask_key]
@@ -63,6 +64,16 @@ class MSELoss(LossModule):
                 mask = mask.repeat(1, mse_loss.shape[1], 1)
 
             mse_loss = mse_loss[mask]
+        
+        if self.key_c is not None and self.key_c in info:
+            sample_weight = info[self.key_c]
+
+            # Ensure sample_weight is broadcastable to the loss shape
+            if sample_weight.ndim == 1 and mse_loss.ndim == 3:
+                sample_weight = sample_weight.unsqueeze(1).unsqueeze(2) # [2,3] -> [[[2], [3]]]
+
+            # Apply sample-wise weight to the loss
+            mse_loss = mse_loss * sample_weight
 
         mse_loss = mse_loss.mean()
 

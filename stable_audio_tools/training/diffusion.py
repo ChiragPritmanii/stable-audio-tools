@@ -17,7 +17,7 @@ from torch import optim
 from torch.nn import functional as F
 from pytorch_lightning.utilities.rank_zero import rank_zero_only
 
-from ..inference.sampling import get_alphas_sigmas, sample
+from ..inference.sampling import get_alphas_sigmas, get_snr, snr_to_weight, sample
 from ..models.diffusion import DiffusionModelWrapper, ConditionedDiffusionModelWrapper
 from ..models.autoencoders import DiffusionAutoencoder
 from ..models.diffusion_prior import PriorType
@@ -254,7 +254,8 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
 
         self.loss_modules = [
             MSELoss("v", 
-                   "targets", 
+                   "targets",
+                   "snr_weights",
                    weight=1.0, 
                    mask_key="padding_mask" if self.mask_padding else None, 
                    name="mse_loss"
@@ -364,6 +365,10 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
 
         # Calculate the noise schedule parameters for those timesteps
         alphas, sigmas = get_alphas_sigmas(t)
+
+        snr = get_snr(alphas, sigmas, clamp_min=True, clamp_min_value=1e-3)
+
+        snr_weights = snr_to_weight(snr=snr, gamma=5)
         # alphas, sigmas = torch.clip(alphas, min=0, max=1), torch.clip(alphas, min=0, max=1)
         # print("alphas, sigmas",  alphas, sigmas)
 
@@ -446,6 +451,7 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
             loss_info.update({
                 "v": v,
                 "targets": targets,
+                "snr_weights": snr_weights,
                 "padding_mask": padding_masks if use_padding_mask else None,
             })
             # print({
