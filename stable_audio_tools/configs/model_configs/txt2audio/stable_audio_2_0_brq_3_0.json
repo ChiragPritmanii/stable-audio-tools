@@ -123,14 +123,14 @@
             }
         },
         "demo": {
-            "demo_every": 50,
+            "demo_every": 250,
             "demo_steps": 50,
             "num_demos": 4,
             "display_audio_cond": true,
             "demo_cond_from_batch": true,
             "demo_save_dir" : "/home/chirag/models/diffusion/runs/1/outputs",
             "demo_random": false,
-            "demo_random_dir": "/home/chirag/datasets/subset7", 
+            "demo_random_dir": null, 
             "demo_cond": [
                 {
                     "prompt": {"path":["/home/chirag/datasets/subset7/song_835934.wav"], "seconds_start": 32, "seconds_total": 215},

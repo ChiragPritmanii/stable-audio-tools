@@ -601,18 +601,15 @@ class DiffusionCondDemoCallback(pl.Callback):
 
             cond_inputs = module.diffusion.get_conditioning_inputs(conditioning)
             log_dict = {}
-            if self.demo_random:
-                assert self.demo_random_dir!=None
-                subset_files = glob(self.demo_random_dir+"/*wav")
-                random_files = random.sample(subset_files, k=4) # without replacement
-                files_seconds_total = [str(int(float(mediainfo(f)['duration']))) for f in random_files]
-                files_seconds_start = [str(32)]*4
-                demo_data = list(zip(random_files, files_seconds_start, files_seconds_total))
-            else:
-                demo_data = [[demo_cond[0]['prompt']["path"][0], str(demo_cond[0]['seconds_start']), str(demo_cond[0]['seconds_total'])],
-                            [demo_cond[1]['prompt']["path"][0], str(demo_cond[1]['seconds_start']), str(demo_cond[1]['seconds_total'])],
-                            [demo_cond[2]['prompt']["path"][0], str(demo_cond[2]['seconds_start']), str(demo_cond[2]['seconds_total'])],
-                            [demo_cond[3]['prompt']["path"][0], str(demo_cond[3]['seconds_start']), str(demo_cond[3]['seconds_total'])]]
+            # if self.demo_random:
+            #     assert self.demo_random_dir!=None
+            #     subset_files = glob(self.demo_random_dir+"/*wav")
+            #     random_files = random.sample(subset_files, k=4) # without replacement
+            #     files_seconds_total = [str(int(float(mediainfo(f)['duration']))) for f in random_files]
+            #     files_seconds_start = [str(32)]*4
+            #     demo_data = list(zip(random_files, files_seconds_start, files_seconds_total))
+            # else:
+            demo_data = [[demo_cond[i]['prompt']["path"][0], str(demo_cond[i]['seconds_start']), str(demo_cond[i]['seconds_total'])] for i in range(len(demo_cond))]
                 
             log_dict['demo_inputs'] = wandb.Table(columns=['prompt', 'seconds_start', 'seconds_total'], data = demo_data)
 
