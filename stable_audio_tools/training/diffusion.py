@@ -246,7 +246,7 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
         self.mask_padding = mask_padding
         self.mask_padding_dropout = mask_padding_dropout
 
-        print("self.mask_padding, self.mask_padding_dropout ", self.mask_padding, self.mask_padding_dropout )
+        # print("self.mask_padding, self.mask_padding_dropout ", self.mask_padding, self.mask_padding_dropout )
 
 
         self.rng = torch.quasirandom.SobolEngine(1, scramble=True)
@@ -609,7 +609,7 @@ class DiffusionCondDemoCallback(pl.Callback):
             #     files_seconds_start = [str(32)]*4
             #     demo_data = list(zip(random_files, files_seconds_start, files_seconds_total))
             # else:
-            demo_data = [[demo_cond[i]['prompt']["path"][0], str(demo_cond[i]['seconds_start']), str(demo_cond[i]['seconds_total'])] for i in range(len(demo_cond))]
+            demo_data = [[demo_cond[i]['prompt']["path"][0], str(demo_cond[i]['seconds_start'].item()), str(demo_cond[i]['seconds_total'].item())] for i in range(len(demo_cond))]
                 
             log_dict['demo_inputs'] = wandb.Table(columns=['prompt', 'seconds_start', 'seconds_total'], data = demo_data)
 
