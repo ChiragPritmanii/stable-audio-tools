@@ -76,31 +76,12 @@
                         "use_positional_embedding": true,
                         "pos_emb_dim": 512
                     }
-                },
-                {
-                    "id": "seconds_start",
-                    "type": "number",
-                    "config": {
-                        "min_val": 0,
-                        "max_val": 512,
-                        "output_dim": 768
-                    }
-                },
-                {
-                    "id": "seconds_total",
-                    "type": "number",
-                    "config": {
-                        "min_val": 0,
-                        "max_val": 512,
-                        "output_dim": 768
-                    }
                 }
             ],
             "cond_dim": 1536
         },
         "diffusion": {
             "cross_attention_cond_ids": ["prompt"],
-            "global_cond_ids": ["seconds_start","seconds_total"],
             "type": "dit",
             "config": {
                 "io_channels": 64,
@@ -146,6 +127,7 @@
             "demo_steps": 50,
             "num_demos": 4,
             "display_audio_cond": true,
+            "demo_cond_from_batch": true,
             "demo_save_dir" : "/home/chirag/models/diffusion/runs/1/outputs",
             "demo_random": false,
             "demo_random_dir": "/home/chirag/datasets/subset7", 

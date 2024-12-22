@@ -1,3 +1,4 @@
+import os
 import pytorch_lightning as pl
 import sys, gc
 import random
@@ -366,7 +367,7 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
         # Calculate the noise schedule parameters for those timesteps
         alphas, sigmas = get_alphas_sigmas(t)
 
-        snr = get_snr(alphas, sigmas, clamp_min=True, clamp_min_value=1e-3)
+        snr = get_snr(alphas, sigmas, clamp_min=True, clamp_min_value=0.1)
 
         snr_weights = snr_to_weight(snr=snr, gamma=5)
         # alphas, sigmas = torch.clip(alphas, min=0, max=1), torch.clip(alphas, min=0, max=1)
@@ -399,7 +400,7 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
         # Create batch tensor of attention masks from the "mask" field of the metadata array
         if use_padding_mask:
             padding_masks = torch.stack([md["padding_mask"][0] for md in metadata], dim=0).to(self.device) # Shape (batch_size, sequence_length)
-            print("padding_masks.shape, padding_masks", padding_masks.shape, padding_masks)
+            # print("padding_masks.shape, padding_masks", padding_masks.shape, padding_masks)
 
         p.tick("conditioning")
 
@@ -535,6 +536,9 @@ class DiffusionCondDemoCallback(pl.Callback):
                  sample_size=65536,
                  demo_steps=250,
                  sample_rate=48000,
+                 demo_save_dir=None,
+                 demo_random=False,
+                 demo_random_dir=None,
                  demo_conditioning: tp.Optional[tp.Dict[str, tp.Any]] = {},
                  demo_cfg_scales: tp.Optional[tp.List[int]] = [1, 8, 12],
                  demo_cond_from_batch: bool = False,
@@ -547,11 +551,18 @@ class DiffusionCondDemoCallback(pl.Callback):
         self.demo_samples = sample_size
         self.demo_steps = demo_steps
         self.sample_rate = sample_rate
+        self.demo_save_dir = demo_save_dir
+        self.demo_random = demo_random,
+        self.demo_random_dir = demo_random_dir,
         self.last_demo_step = -1
         self.demo_conditioning = demo_conditioning
         self.demo_cfg_scales = demo_cfg_scales
 
+        if not os.path.exists(self.demo_save_dir):
+            os.mkdir(self.demo_save_dir)
+
         # If true, the callback will use the metadata from the batch to generate the demo conditioning
+        # instead of fixed sample we can directly set this condition to true for varied samples
         self.demo_cond_from_batch = demo_cond_from_batch
 
         # If true, the callback will display the audio conditioning
@@ -582,9 +593,6 @@ class DiffusionCondDemoCallback(pl.Callback):
             demo_samples = demo_samples // module.diffusion.pretransform.downsampling_ratio #downsampled sample size 
 
         noise = torch.randn([self.num_demos, module.diffusion.io_channels, demo_samples]).to(module.device)
-
-        subset_dir = "/home/chirag/datasets/subset5"
-        random_samples = False
         
         try:
             print("Getting conditioning")
@@ -593,9 +601,9 @@ class DiffusionCondDemoCallback(pl.Callback):
 
             cond_inputs = module.diffusion.get_conditioning_inputs(conditioning)
             log_dict = {}
-            if random_samples:
-                assert subset_dir!=None
-                subset_files = glob(subset_dir+"/*wav")
+            if self.demo_random:
+                assert self.demo_random_dir!=None
+                subset_files = glob(self.demo_random_dir+"/*wav")
                 random_files = random.sample(subset_files, k=4) # without replacement
                 files_seconds_total = [str(int(float(mediainfo(f)['duration']))) for f in random_files]
                 files_seconds_start = [str(32)]*4
@@ -611,17 +619,18 @@ class DiffusionCondDemoCallback(pl.Callback):
             wavs = []
             for path, start, _ in demo_data:
                 wav, sr = torchaudio.load(path)
-                wav = (wav[:, int(start)*sr:(int(start)+32)*sr]).unsqueeze(0)
-                wavs.append(wav)
-
-            tmp_dir = "/home/chirag/models/diffusion/runs/outputs/8/"
+                wav = wav[:, int(start)*sr:(int(start)+32)*sr]
+                real_wav = torch.zeros(wav.shape[0], 2097152) #47.55*44100
+                real_wav[:, :wav.shape[1]] = wav
+                real_wav = real_wav.unsqueeze(0)
+                wavs.append(real_wav)
 
             if self.display_audio_cond:
                 # audio_inputs = torch.cat([cond["audio"] for cond in demo_cond], dim=0)
                 audio_inputs = torch.cat(wavs, dim=0) # batch, channels, timesteps
                 audio_inputs = rearrange(audio_inputs, 'b d n -> d (b n)')
 
-                filename = f'{tmp_dir}demo_audio_cond_{trainer.global_step:08}.wav'
+                filename = os.path.join(self.demo_dir,f'demo_audio_cond_{trainer.global_step:08}.wav')
                 audio_inputs = audio_inputs.to(torch.float32).mul(32767).to(torch.int16).cpu()
                 torchaudio.save(filename, audio_inputs, self.sample_rate)
                 log_dict[f'demo_audio_cond'] = wandb.Audio(filename, sample_rate=self.sample_rate, caption="Audio conditioning")
@@ -645,7 +654,7 @@ class DiffusionCondDemoCallback(pl.Callback):
 
                 # log_dict = {}
                 
-                filename = f'{tmp_dir}demo_cfg_{cfg_scale}_{trainer.global_step:08}.wav'
+                filename = os.path.join(self.demo_dir,f'demo_cfg_{cfg_scale}_{trainer.global_step:08}.wav')
                 fakes = fakes.to(torch.float32).div(torch.max(torch.abs(fakes))).mul(32767).to(torch.int16).cpu()
                 torchaudio.save(filename, fakes, self.sample_rate)
 
