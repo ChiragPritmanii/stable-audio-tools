@@ -416,7 +416,6 @@ class DiffusionCondTrainingWrapper(pl.LightningModule):
                 if use_padding_mask:
                     padding_masks = F.interpolate(padding_masks.unsqueeze(1).float(), size=diffusion_input.shape[2], mode="nearest").squeeze(1).bool()
                     # print("padding_masks, padding_masks.shape", padding_masks, padding_masks.shape)
-                    print("padding_masks.shape", padding_masks.shape)
 
         # Combine the ground truth data and the noise
         alphas = alphas[:, None, None]
@@ -627,7 +626,7 @@ class DiffusionCondDemoCallback(pl.Callback):
                 audio_inputs = torch.cat(wavs, dim=0) # batch, channels, timesteps
                 audio_inputs = rearrange(audio_inputs, 'b d n -> d (b n)')
 
-                filename = os.path.join(self.demo_dir,f'demo_audio_cond_{trainer.global_step:08}.wav')
+                filename = os.path.join(self.demo_save_dir,f'demo_audio_cond_{trainer.global_step:08}.wav')
                 audio_inputs = audio_inputs.to(torch.float32).mul(32767).to(torch.int16).cpu()
                 torchaudio.save(filename, audio_inputs, self.sample_rate)
                 log_dict[f'demo_audio_cond'] = wandb.Audio(filename, sample_rate=self.sample_rate, caption="Audio conditioning")
@@ -651,7 +650,7 @@ class DiffusionCondDemoCallback(pl.Callback):
 
                 # log_dict = {}
                 
-                filename = os.path.join(self.demo_dir,f'demo_cfg_{cfg_scale}_{trainer.global_step:08}.wav')
+                filename = os.path.join(self.demo_save_dir,f'demo_cfg_{cfg_scale}_{trainer.global_step:08}.wav')
                 fakes = fakes.to(torch.float32).div(torch.max(torch.abs(fakes))).mul(32767).to(torch.int16).cpu()
                 torchaudio.save(filename, fakes, self.sample_rate)
 
