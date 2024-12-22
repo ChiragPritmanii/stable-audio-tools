@@ -52,20 +52,9 @@ class MSELoss(LossModule):
         self.mask_key = mask_key
     
     def forward(self, info):
-        print(info[self.key_a].shape, info[self.key_b].shape, info[self.mask_key].shape, (info[self.mask_key]==False).sum())
+        # print(info[self.key_a].shape, info[self.key_b].shape, info[self.mask_key].shape, (info[self.mask_key]==False).sum())
         mse_loss = F.mse_loss(info[self.key_a], info[self.key_b], reduction='none') 
 
-        if self.mask_key is not None and self.mask_key in info and info[self.mask_key] is not None:
-            mask = info[self.mask_key]
-
-            if mask.ndim == 2 and mse_loss.ndim == 3:
-                mask = mask.unsqueeze(1)
-
-            if mask.shape[1] != mse_loss.shape[1]:
-                mask = mask.repeat(1, mse_loss.shape[1], 1)
-
-            mse_loss = mse_loss[mask]
-        
         if self.key_c is not None and self.key_c in info:
             sample_weight = info[self.key_c]
 
@@ -75,7 +64,19 @@ class MSELoss(LossModule):
 
             # Apply sample-wise weight to the loss
             mse_loss = mse_loss * sample_weight
+        
+        if self.mask_key is not None and self.mask_key in info and info[self.mask_key] is not None:
+            mask = info[self.mask_key]
 
+            if mask.ndim == 2 and mse_loss.ndim == 3:
+                mask = mask.unsqueeze(1)
+
+            if mask.shape[1] != mse_loss.shape[1]:
+                mask = mask.repeat(1, mse_loss.shape[1], 1)
+            
+            # Apply pad mask to neglect the padding from values from the tensor 
+            mse_loss = mse_loss[mask]
+        
         mse_loss = mse_loss.mean()
 
         return self.weight * mse_loss
