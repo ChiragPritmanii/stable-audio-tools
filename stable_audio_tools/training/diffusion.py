@@ -559,8 +559,8 @@ class DiffusionCondDemoCallback(pl.Callback):
         self.demo_cfg_scales = demo_cfg_scales
 
         if not os.path.exists(self.demo_save_dir):
-            os.mkdir(self.demo_save_dir)
-
+            os.makedirs(self.demo_save_dir, exist_ok=True)
+        
         # If true, the callback will use the metadata from the batch to generate the demo conditioning
         # instead of fixed sample we can directly set this condition to true for varied samples
         self.demo_cond_from_batch = demo_cond_from_batch
