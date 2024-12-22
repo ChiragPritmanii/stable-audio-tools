@@ -125,7 +125,7 @@
         "demo": {
             "demo_every": 250,
             "demo_steps": 50,
-            "num_demos": 4,
+            "num_demos": 2,
             "display_audio_cond": true,
             "demo_cond_from_batch": true,
             "demo_save_dir" : "/home/chirag/models/diffusion/runs/1/outputs",
@@ -141,16 +141,6 @@
                     "prompt": {"path":["/home/chirag/datasets/subset7/song_578604.wav"], "seconds_start": 32, "seconds_total": 215},
                     "seconds_start": 32,
                     "seconds_total": 215
-                },
-                {
-                    "prompt": {"path":["/home/chirag/datasets/subset7/song_6347636.wav"], "seconds_start": 32, "seconds_total": 235},
-                    "seconds_start": 32,
-                    "seconds_total": 235
-                },
-                {
-                    "prompt": {"path":["/home/chirag/datasets/subset7/song_1131295.wav"], "seconds_start": 32, "seconds_total": 214},
-                    "seconds_start": 32,
-                    "seconds_total": 214
                 }
             ],
             "demo_cfg_scales": [1, 2, 6]
