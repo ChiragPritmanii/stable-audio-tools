@@ -8,7 +8,7 @@ def get_snr(alphas, sigmas, clamp_min=True, clamp_min_value=1e-3):
     """Returns the signal-to-noise ratio for a given number of steps."""
     snr = (alphas**2) / (sigmas**2)
     if clamp_min:
-        snr = torch.clamp_min(snr, 1e-3)
+        snr = torch.clamp(snr, min=clamp_min_value)
     return snr
 
 def snr_to_weight(snr, gamma=5):
