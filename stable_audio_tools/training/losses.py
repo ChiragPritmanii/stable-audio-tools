@@ -52,6 +52,7 @@ class MSELoss(LossModule):
         self.mask_key = mask_key
     
     def forward(self, info):
+        print(info[self.key_a].shape, info[self.key_b].shape, info[self.mask_key].shape, (info[self.mask_key]==False).sum())
         mse_loss = F.mse_loss(info[self.key_a], info[self.key_b], reduction='none') 
 
         if self.mask_key is not None and self.mask_key in info and info[self.mask_key] is not None:
