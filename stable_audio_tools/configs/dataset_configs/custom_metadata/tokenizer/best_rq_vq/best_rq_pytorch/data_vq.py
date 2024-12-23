@@ -29,7 +29,7 @@ def exists(val):
 
 accelerator = "cuda"
 pretrained_checkpoint = (
-    "/home/chirag//audio_tokenizer/best_rq/runs/8/results/bestrq.196000.pt"
+    "/home/chirag/audio_tokenizer/best_rq/runs/8/results/bestrq.196000.pt"
 )
 
 pre_transform = BestRQ(
