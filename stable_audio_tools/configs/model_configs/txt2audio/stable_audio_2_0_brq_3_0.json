@@ -104,7 +104,7 @@
                 "optimizer": {
                     "type": "AdamW",
                     "config": {
-                        "lr": 5e-5,
+                        "lr": 2.5e-6,
                         "betas": [
                             0.9,
                             0.999
