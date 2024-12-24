@@ -128,7 +128,7 @@
             "num_demos": 1,
             "display_audio_cond": true,
             "demo_cond_from_batch": true,
-            "demo_save_dir" : "/home/chirag/models/diffusion/runs/5/outputs",
+            "demo_save_dir" : "/home/chirag/models/diffusion/runs/6/outputs",
             "demo_random": false,
             "demo_random_dir": null, 
             "demo_cond": [
