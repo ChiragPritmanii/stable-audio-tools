@@ -104,7 +104,7 @@
                 "optimizer": {
                     "type": "AdamW",
                     "config": {
-                        "lr": 5e-4,
+                        "lr": 5e-7,
                         "betas": [
                             0.9,
                             0.999
@@ -123,12 +123,12 @@
             }
         },
         "demo": {
-            "demo_every": 250,
-            "demo_steps": 50,
+            "demo_every": 100,
+            "demo_steps": 100,
             "num_demos": 1,
             "display_audio_cond": true,
             "demo_cond_from_batch": true,
-            "demo_save_dir" : "/home/chirag/models/diffusion/runs/4/outputs",
+            "demo_save_dir" : "/home/chirag/models/diffusion/runs/5/outputs",
             "demo_random": false,
             "demo_random_dir": null, 
             "demo_cond": [
