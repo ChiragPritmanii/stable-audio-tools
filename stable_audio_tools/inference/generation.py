@@ -206,7 +206,7 @@ def generate_diffusion_cond(
     # sampled = sample_k(model.model, noise, init_audio, mask, steps, **sampler_kwargs, **conditioning_tensors, **negative_conditioning_tensors, cfg_scale=cfg_scale, batch_cfg=True, rescale_cfg=True, device=device)
 
     # v-diffusion: 
-    sampled = sample(model.model, noise, steps, 0, **conditioning_tensors, embedding_scale=cfg_scale)
+    sampled = sample(model.model, noise, steps, 0.5, **conditioning_tensors, embedding_scale=cfg_scale)
 
     # Denoising process done. 
     # If this is latent diffusion, decode latents back into audio
