@@ -639,9 +639,9 @@ class DiffusionCondDemoCallback(pl.Callback):
                 
                 with torch.cuda.amp.autocast():
                     model = module.diffusion_ema.model if module.diffusion_ema is not None else module.diffusion.model
-                    # fakes = sample(model, noise, self.demo_steps, 1, **cond_inputs, cfg_scale=cfg_scale, batch_cfg=True)
+                    fakes = sample(model, noise, self.demo_steps, 1, **cond_inputs, cfg_scale=cfg_scale, batch_cfg=True)
                     # original setting: 
-                    fakes = sample(model, noise, self.demo_steps, 0, **cond_inputs, cfg_scale=cfg_scale, batch_cfg=True)
+                    # fakes = sample(model, noise, self.demo_steps, 0, **cond_inputs, cfg_scale=cfg_scale, batch_cfg=True)
                     if module.diffusion.pretransform is not None:
                         fakes = module.diffusion.pretransform.decode(fakes)
 
