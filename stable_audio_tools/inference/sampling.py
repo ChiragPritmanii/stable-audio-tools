@@ -69,6 +69,8 @@ def sample(model, x, steps, eta, **extra_args):
             # correct proportions for the next step
             x = pred * alphas[i + 1] + eps * adjusted_sigma
 
+            print(pred.shape, (pred==0).sum(), eps.shape, (eps==0).sum())
+
             # Add the correct amount of fresh noise
             if eta:
                 x += torch.randn_like(x) * ddim_sigma
