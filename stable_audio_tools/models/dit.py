@@ -239,7 +239,7 @@ class DiffusionTransformer(nn.Module):
         cfg_scale=1.0,
         cfg_dropout_prob=0.0,
         causal=False,
-        scale_phi=0.0,
+        scale_phi=1.0, #try out cfg rescale to remove saturation from the output
         mask=None,
         **kwargs):
 
