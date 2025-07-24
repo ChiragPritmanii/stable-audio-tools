@@ -1,0 +1,11 @@
+{
+    "dataset_type": "wds",
+    "datasets": [
+        {
+            "id": "rap_15k",
+            "path": "/home/chirag/datasets/dataset_300k/rap_15k.tar"
+        }
+    ],
+    "epoch_steps":1500000,
+    "random_crop": true
+}

@@ -32,6 +32,7 @@ setup(
         'torchmetrics==0.11.4',
         'tqdm',
         'transformers',
+        'sentence_transformers',
         'v-diffusion-pytorch==0.0.2',
         'vector-quantize-pytorch==1.14.41',
         'wandb==0.15.4',

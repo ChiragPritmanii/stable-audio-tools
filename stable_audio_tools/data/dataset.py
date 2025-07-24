@@ -15,7 +15,7 @@ import webdataset as wds
 from os import path
 from torch import nn
 from torchaudio import transforms as T
-from typing import Optional, Callable, List
+from typing import Union, Optional, Callable, List
 
 from .utils import Stereo, Mono, PhaseFlipper, PadCrop_Normalized_T, VolumeNorm
 
@@ -643,7 +643,7 @@ def collation_fn(samples):
 class WebDatasetDataLoader():
     def __init__(
         self,
-        datasets: List[S3DatasetConfig],
+        datasets: List[Optional[Union[S3DatasetConfig, LocalWebDatasetConfig]]],
         batch_size,
         sample_size,
         sample_rate=48000,
@@ -782,8 +782,8 @@ class WebDatasetDataLoader():
             if found_key != rewrite_key:   # rename long/weird key with its simpler counterpart
                 del sample[found_key]
 
-        if "text" in sample["json"]:
-            sample["json"]["prompt"] = sample["json"]["text"]
+        if "prompt_ts" in sample["json"]:
+            sample["json"]["prompt"] = sample["json"]["prompt_ts"]
 
         # Check for custom metadata functions
         for dataset in self.datasets:
