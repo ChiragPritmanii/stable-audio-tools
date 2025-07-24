@@ -722,7 +722,8 @@ class WebDatasetDataLoader():
         if '' == found_key:  # got no audio!
             return None  # try returning None to tell WebDataset to skip this one
         
-        print(f"Found audio key: {found_key} in sample {sample['json']['__url__']}")
+        print(f"Processing sample {sample['__url__'], sample.keys()}")
+        print(f"Found audio key: {found_key} in sample {sample['__url__']}")
         audio, in_sr = sample[found_key]
         if in_sr != self.sample_rate:
             resample_tf = T.Resample(in_sr, self.sample_rate)
