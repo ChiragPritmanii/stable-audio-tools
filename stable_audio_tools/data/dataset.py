@@ -602,10 +602,7 @@ class LocalWebDatasetConfig:
         self.urls = []
 
     def load_data_urls(self):
-
-        self.urls = fast_scandir(self.path, ["tar"])[1]
-        print(len(self.urls), "tar files found in", self.path)
-
+        self.url.append(self.path)
         return self.urls
 
 def audio_decoder(key, value):
