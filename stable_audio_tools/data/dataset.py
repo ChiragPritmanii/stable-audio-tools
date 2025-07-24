@@ -686,7 +686,7 @@ class WebDatasetDataLoader():
         print(urls)
 
         self.dataset = wds.DataPipeline(
-            wds.ResampledShards(urls) if resampled_shards else wds.SimpleShardList(urls),
+            wds.ResampledShards(urls),
             wds.tarfile_to_samples(handler=log_and_continue),
             wds.decode(audio_decoder, handler=log_and_continue) if not self.pre_encoded else wds.decode(npy_decoder, handler=log_and_continue),
             # wds.map(self.wds_preprocess, handler=log_and_continue),
@@ -697,13 +697,16 @@ class WebDatasetDataLoader():
             wds.batched(batch_size, partial=False, collation_fn=collation_fn),
         )
 
-        if resampled_shards:
-            self.dataset = self.dataset.with_epoch(epoch_steps//num_workers if num_workers > 0 else epoch_steps)
+        # if resampled_shards:
+        #     self.dataset = self.dataset.with_epoch(epoch_steps//num_workers if num_workers > 0 else epoch_steps)
 
-        def worker_init_fn(worker_id):
-            torch.multiprocessing.set_sharing_strategy('file_system')
+        # def worker_init_fn(worker_id):
+        #     torch.multiprocessing.set_sharing_strategy('file_system')
 
-        self.data_loader = wds.WebLoader(self.dataset, num_workers=num_workers, worker_init_fn=worker_init_fn, **data_loader_kwargs)
+        self.data_loader = wds.WebLoader(self.dataset, num_workers=num_workers, **data_loader_kwargs)
+
+
+        # self.data_loader = wds.WebLoader(self.dataset, num_workers=num_workers, worker_init_fn=worker_init_fn, **data_loader_kwargs)
 
     def wds_preprocess(self, sample):
         print(sample.keys())
