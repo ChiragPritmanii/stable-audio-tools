@@ -458,7 +458,7 @@ def get_all_s3_urls(
 
 def log_and_continue(exn):
     """Call in an exception handler to ignore any exception, isssue a warning, and continue."""
-    print(f"Handling webdataset error ({repr(exn)}). Ignoring.")
+    print(f"Handling webdataset error ({(exn)}). Ignoring.") # repr(exn)
     return True
 
 # get_dbmax and is_silence copied from https://github.com/drscotthawley/aeiou/blob/main/aeiou/core.py under Apache 2.0 License
