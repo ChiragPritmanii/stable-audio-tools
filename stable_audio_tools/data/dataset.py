@@ -705,7 +705,7 @@ class WebDatasetDataLoader():
         self.data_loader = wds.WebLoader(self.dataset, num_workers=num_workers, worker_init_fn=worker_init_fn, **data_loader_kwargs)
 
     def wds_preprocess(self, sample):
-        print(sample["json"])
+        print(sample.keys())
 
         if self.pre_encoded:
             audio = torch.from_numpy(sample["npy"])
