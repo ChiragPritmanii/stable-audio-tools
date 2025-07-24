@@ -3,7 +3,8 @@
     "datasets": [
         {
             "id": "rap_15k",
-            "path": "/home/chirag/datasets/dataset_300k/rap_15k.tar"
+            "path": "/home/chirag/datasets/dataset_300k/rap_15k.tar",
+            "custom_metadata_module": "/path/to/custom_metadata/custom_md_example.py"
         }
     ],
     "epoch_steps":1500000,

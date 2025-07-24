@@ -683,6 +683,7 @@ class WebDatasetDataLoader():
 
         # Shuffle the urls
         random.shuffle(urls)
+        print(urls)
 
         self.dataset = wds.DataPipeline(
             wds.ResampledShards(urls) if resampled_shards else wds.SimpleShardList(urls),
