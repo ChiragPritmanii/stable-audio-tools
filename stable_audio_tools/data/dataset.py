@@ -705,6 +705,7 @@ class WebDatasetDataLoader():
         self.data_loader = wds.WebLoader(self.dataset, num_workers=num_workers, worker_init_fn=worker_init_fn, **data_loader_kwargs)
 
     def wds_preprocess(self, sample):
+        print(sample)
 
         if self.pre_encoded:
             audio = torch.from_numpy(sample["npy"])
@@ -781,7 +782,7 @@ class WebDatasetDataLoader():
                 del sample[found_key]
 
         if "prompt_ts" in sample["json"]:
-            sample["json"]["prompt"] = sample["json"]["prompt_ts"]
+            sample["json"]["prompt_ts"] = sample["json"]["prompt_ts"]
 
         # Check for custom metadata functions
         for dataset in self.datasets:
@@ -791,6 +792,8 @@ class WebDatasetDataLoader():
             if dataset.path in sample["__url__"]:
                 custom_metadata = dataset.custom_metadata_fn(sample["json"], audio)
                 sample["json"].update(custom_metadata)
+        
+        print(sample["json"])
 
         sample["audio"] = audio
         # Add audio to the metadata as well for conditioning

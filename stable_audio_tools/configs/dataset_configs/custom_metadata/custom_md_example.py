@@ -212,6 +212,6 @@ class MetadataProcessor:
 mproc = MetadataProcessor()
 
 def get_custom_metadata(info, audio):
-    prompt = mproc.get_text_prompt(info["prompt"], "accompaniment")
+    prompt = mproc.get_text_prompt(info["prompt_ts"], "accompaniment")
     # Use relative path as the prompt
     return {"prompt": prompt}
