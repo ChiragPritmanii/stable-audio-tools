@@ -709,81 +709,51 @@ class WebDatasetDataLoader():
         # self.data_loader = wds.WebLoader(self.dataset, num_workers=num_workers, worker_init_fn=worker_init_fn, **data_loader_kwargs)
 
     def wds_preprocess(self, sample):
-        print(sample.keys())
 
-        if self.pre_encoded:
-            audio = torch.from_numpy(sample["npy"])
-            del sample["npy"]
-            sample["__pre_encoded__"] = True
-
-            padding_mask = sample["json"]["padding_mask"]
-            if self.latent_crop_length is not None:
-
-                # Get the last index from the padding mask, the index of the last 1 in the sequence
-                last_ix = len(padding_mask) - 1 - padding_mask[::-1].index(1)
-
-                if self.random_crop and last_ix > self.latent_crop_length:
-                    start = random.randint(0, last_ix - self.latent_crop_length)
-                else:
-                    start = 0
-                    
-                audio = audio[:, start:start+self.latent_crop_length]
-
-                padding_mask = padding_mask[start:start+self.latent_crop_length]
-
-            sample["json"]["padding_mask"] = torch.tensor(padding_mask)
-        else:
-            found_key, rewrite_key = '', ''
-            for k, v in sample.items():  # print the all entries in dict
-                for akey in AUDIO_KEYS:
-                    if k.endswith(akey):
-                        # to rename long/weird key with its simpler counterpart
-                        found_key, rewrite_key = k, akey
-                        break
-                if '' != found_key:
+        found_key, rewrite_key = '', ''
+        for k, v in sample.items():  # print the all entries in dict
+            for akey in AUDIO_KEYS:
+                if k.endswith(akey):
+                    # to rename long/weird key with its simpler counterpart
+                    found_key, rewrite_key = k, akey
                     break
-            if '' == found_key:  # got no audio!
-                return None  # try returning None to tell WebDataset to skip this one
+            if '' != found_key:
+                break
+        if '' == found_key:  # got no audio!
+            return None  # try returning None to tell WebDataset to skip this one
 
-            audio, in_sr = sample[found_key]
-            if in_sr != self.sample_rate:
-                resample_tf = T.Resample(in_sr, self.sample_rate)
-                audio = resample_tf(audio)
+        audio, in_sr = sample[found_key]
+        if in_sr != self.sample_rate:
+            resample_tf = T.Resample(in_sr, self.sample_rate)
+            audio = resample_tf(audio)
 
-                    # Replace the long silence by the short for the mono audios
-            if audio.shape[0] == 1 and self.remove_silence:
-                audio = remove_long_silence(audio, self.sample_rate, self.silence_threshold, self.max_silence_duration)
+        if self.sample_size is not None:
+            # Pad/crop and get the relative timestamp
+            pad_crop = PadCrop_Normalized_T(
+                self.sample_size, randomize=self.random_crop, sample_rate=self.sample_rate)
+            audio, t_start, t_end, seconds_start, seconds_total, padding_mask = pad_crop(
+                audio)
+            sample["json"]["seconds_start"] = seconds_start
+            sample["json"]["seconds_total"] = seconds_total
+            sample["json"]["padding_mask"] = padding_mask
+        else:
+            t_start, t_end = 0, 1
 
-            if self.sample_size is not None:
-                # Pad/crop and get the relative timestamp
-                pad_crop = PadCrop_Normalized_T(
-                    self.sample_size, randomize=self.random_crop, sample_rate=self.sample_rate)
-                audio, t_start, t_end, seconds_start, seconds_total, padding_mask = pad_crop(
-                    audio)
-                sample["json"]["seconds_start"] = seconds_start
-                sample["json"]["seconds_total"] = seconds_total
-                sample["json"]["padding_mask"] = padding_mask
-            else:
-                t_start, t_end = 0, 1
+        # Check if audio is length zero, initialize to a single zero if so
+        if audio.shape[-1] == 0:
+            audio = torch.zeros(1, 1)
 
-            # Check if audio is length zero, initialize to a single zero if so
-            if audio.shape[-1] == 0:
-                audio = torch.zeros(1, 1)
+        # Make the audio stereo and augment by randomly inverting phase
+        augs = torch.nn.Sequential(
+            Stereo() if self.force_channels == "stereo" else torch.nn.Identity(),
+            Mono() if self.force_channels == "mono" else torch.nn.Identity(),
+            VolumeNorm(self.volume_norm_param, self.sample_rate) if self.volume_norm else torch.nn.Identity(),
+            PhaseFlipper() if self.augment_phase else torch.nn.Identity()
+        )
 
-            # Make the audio stereo and augment by randomly inverting phase
-            augs = torch.nn.Sequential(
-                Stereo() if self.force_channels == "stereo" else torch.nn.Identity(),
-                Mono() if self.force_channels == "mono" else torch.nn.Identity(),
-                VolumeNorm(self.volume_norm_param, self.sample_rate) if self.volume_norm else torch.nn.Identity(),
-                PhaseFlipper() if self.augment_phase else torch.nn.Identity()
-            )
+        audio = augs(audio)
 
-            audio = augs(audio)
-
-            sample["json"]["timestamps"] = (t_start, t_end)
-
-            if found_key != rewrite_key:   # rename long/weird key with its simpler counterpart
-                del sample[found_key]
+        sample["json"]["timestamps"] = (t_start, t_end)
 
         if "prompt_ts" in sample["json"]:
             sample["json"]["prompt_ts"] = sample["json"]["prompt_ts"]
@@ -793,17 +763,95 @@ class WebDatasetDataLoader():
             if dataset.custom_metadata_fn is None:
                 continue
         
-            if dataset.path in sample["__url__"]:
+            if dataset.local_path in sample["__url__"]:
                 custom_metadata = dataset.custom_metadata_fn(sample["json"], audio)
                 sample["json"].update(custom_metadata)
-        
-        print(sample["json"])
+
+        if found_key != rewrite_key:   # rename long/weird key with its simpler counterpart
+            del sample[found_key]
 
         sample["audio"] = audio
+
         # Add audio to the metadata as well for conditioning
         sample["json"]["audio"] = audio
         
         return sample
+    
+    # def wds_preprocess(self, sample):
+    #     if "json" in sample["keys"]
+
+        
+    #     found_key, rewrite_key = '', ''
+    #     for k, v in sample.items():  # print the all entries in dict
+    #         for akey in AUDIO_KEYS:
+    #             if k.endswith(akey):
+    #                 # to rename long/weird key with its simpler counterpart
+    #                 found_key, rewrite_key = k, akey
+    #                 break
+    #         if '' != found_key:
+    #             break
+    #     if '' == found_key:  # got no audio!
+    #         return None  # try returning None to tell WebDataset to skip this one
+
+    #     audio, in_sr = sample[found_key]
+    #     if in_sr != self.sample_rate:
+    #         resample_tf = T.Resample(in_sr, self.sample_rate)
+    #         audio = resample_tf(audio)
+
+    #             # Replace the long silence by the short for the mono audios
+    #     if audio.shape[0] == 1 and self.remove_silence:
+    #         audio = remove_long_silence(audio, self.sample_rate, self.silence_threshold, self.max_silence_duration)
+
+    #     if self.sample_size is not None:
+    #         # Pad/crop and get the relative timestamp
+    #         pad_crop = PadCrop_Normalized_T(
+    #             self.sample_size, randomize=self.random_crop, sample_rate=self.sample_rate)
+    #         audio, t_start, t_end, seconds_start, seconds_total, padding_mask = pad_crop(
+    #             audio)
+    #         sample["json"]["seconds_start"] = seconds_start
+    #         sample["json"]["seconds_total"] = seconds_total
+    #         sample["json"]["padding_mask"] = padding_mask
+    #     else:
+    #         t_start, t_end = 0, 1
+
+    #     # Check if audio is length zero, initialize to a single zero if so
+    #     if audio.shape[-1] == 0:
+    #         audio = torch.zeros(1, 1)
+
+    #     # Make the audio stereo and augment by randomly inverting phase
+    #     augs = torch.nn.Sequential(
+    #         Stereo() if self.force_channels == "stereo" else torch.nn.Identity(),
+    #         Mono() if self.force_channels == "mono" else torch.nn.Identity(),
+    #         VolumeNorm(self.volume_norm_param, self.sample_rate) if self.volume_norm else torch.nn.Identity(),
+    #         PhaseFlipper() if self.augment_phase else torch.nn.Identity()
+    #     )
+
+    #     audio = augs(audio)
+
+    #     sample["json"]["timestamps"] = (t_start, t_end)
+
+    #     if found_key != rewrite_key:   # rename long/weird key with its simpler counterpart
+    #         del sample[found_key]
+
+    #     if "prompt_ts" in sample["json"]:
+    #         sample["json"]["prompt_ts"] = sample["json"]["prompt_ts"]
+
+    #     # Check for custom metadata functions
+    #     for dataset in self.datasets:
+    #         if dataset.custom_metadata_fn is None:
+    #             continue
+        
+    #         if dataset.path in sample["__url__"]:
+    #             custom_metadata = dataset.custom_metadata_fn(sample["json"], audio)
+    #             sample["json"].update(custom_metadata)
+        
+    #     print(sample["json"])
+
+    #     sample["audio"] = audio
+    #     # Add audio to the metadata as well for conditioning
+    #     sample["json"]["audio"] = audio
+        
+    #     return sample
 
 def create_dataloader_from_config(dataset_config, batch_size, sample_size, sample_rate, audio_channels=2, num_workers=4, shuffle = True):
 
