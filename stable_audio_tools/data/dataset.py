@@ -602,7 +602,7 @@ class LocalWebDatasetConfig:
         self.urls = []
 
     def load_data_urls(self):
-        self.url.append(self.path)
+        self.urls.append(self.path)
         return self.urls
 
 def audio_decoder(key, value):
